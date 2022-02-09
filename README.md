@@ -87,17 +87,14 @@ The repository contains different examples for the control of a single qubit:
 
 ## Authors:
 
+- [Julian Arnold](https://github.com/arnoldjulian)
 - [Frank Schäfer](https://github.com/frankschae)
-- Pavel Sekatski
-- [Martin Koppenhöfer](https://github.com/mako-git)
-- Christoph Bruder
-- [Michal Kloc](https://github.com/MikeKlocCZ)
 
 ```
-@article{schaefer_DP_2021,
-  title={Control of Stochastic Quantum Dynamics with Differentiable Programming},
-  author={Frank Sch\"{a}fer, Pavel Sekatski, Martin Koppenh\"{o}fer, Christoph Bruder, Michal Kloc},
-  journal={arXiv preprint arXiv:2101.01190},
-  year={2021}
+@article{arnold:2022,
+  title={Replacing neural networks by optimal analytical predictors for the detection of phase transitions},
+  author={Arnold, Julian and Sch\"{a}fer, Frank},
+  journal={arXiv preprint arXiv:xxx},
+  year={2022}
 }
 ```
