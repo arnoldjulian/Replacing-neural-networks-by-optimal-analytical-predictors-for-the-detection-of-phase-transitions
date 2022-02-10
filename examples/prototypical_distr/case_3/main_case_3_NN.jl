@@ -18,9 +18,9 @@ save_folder = "./results/"
 p_crit = 2.0f0
 
 # define parameter ranges
-p_min=0.1f0
+p_min = 0.1f0
 p_max = 3.0f0
-dp=0.05f0
+dp = 0.05f0
 p_range = collect(p_min:dp:p_max)
 p_range_LBC = collect(p_min-dp/2:dp:p_max+dp/2)
 
@@ -57,7 +57,7 @@ inputs_one_hot_stand_SL = (inputs_one_hot.-mean_train_SL)./std_train_SL
 # supervised learning using neural networks
 
 # initialize neural network
-n_nodes_SL=[size(inputs_one_hot)[1],64,2]
+n_nodes_SL = [size(inputs_one_hot)[1],64,2]
 NN_SL = Chain(
   Dense(n_nodes_SL[1], n_nodes_SL[2], relu),
   Dense(n_nodes_SL[2], n_nodes_SL[end], identity))
@@ -66,7 +66,7 @@ pnn_SL, re_SL = Flux.destructure(NN_SL)
 # set hyperparameters
 lr_SL = 0.001f0
 epochs_SL = 1000
-saveat_SL=100
+saveat_SL = 100
 opt_SL = ADAM(lr_SL)
 verbose = true
 
@@ -157,13 +157,13 @@ pnn_PBM, re_PBM = Flux.destructure(NN_PBM)
 # set hyperparameters
 lr_PBM = 0.001f0
 epochs_PBM = 1000
-saveat_PBM=100
+saveat_PBM = 100
 opt_PBM = ADAM(lr_PBM)
 verbose = true
 
 # train neural network
 # returns predictions, indicators, and loss saved at epochs specified by saveat_PBM variable
-pred_logger_PBM, losses_PBM, NN_logger_PBM =MLP.get_indicators_PBM_numerical(pnn_PBM,re_PBM,dataset,epochs_PBM,p_range,dp,opt_PBM,inputs_one_hot_stand,verbose=verbose,saveat=saveat_PBM)
+pred_logger_PBM, losses_PBM, NN_logger_PBM = MLP.get_indicators_PBM_numerical(pnn_PBM,re_PBM,dataset,epochs_PBM,p_range,dp,opt_PBM,inputs_one_hot_stand,verbose=verbose,saveat=saveat_PBM)
 
 # extract results at last save point
 pred_NN_PBM = pred_logger_PBM[end][1]
@@ -239,7 +239,7 @@ savefig(save_folder*"loss_NN_PBM.png")
 # learning by confusion using neural networks
 
 # initialize neural network
-n_nodes_LBC=[size(inputs_one_hot)[1],64,2]
+n_nodes_LBC = [size(inputs_one_hot)[1],64,2]
 NN_LBC = Chain(
   Dense(n_nodes_LBC[1], n_nodes_LBC[2], relu),
   Dense(n_nodes_LBC[2], n_nodes_LBC[end], identity))

@@ -43,14 +43,14 @@ function prepare_dataset(p,distribution,samples)
   counter = zero(eltype(length(samples)))
   dist = distribution(samples[1][1],p)
   if dist != zero(eltype(dist))
-    counter +=one(eltype(counter))
+    counter += one(eltype(counter))
   end
 
   data = [[samples[1][1],dist]]
   for indx in 2:length(samples)
     dist = distribution(samples[indx][1],p)
     if dist != zero(eltype(dist))
-      counter +=one(eltype(counter))
+      counter += one(eltype(counter))
     end
     push!(data,[samples[indx][1],dist])
   end
@@ -62,8 +62,8 @@ function get_stats(datasets)
   musq =zero(datasets[1][1][2])
   for dataset in datasets
     for (sample,prob) in dataset
-      mu+=sample*prob
-      musq+=(sample^2)*prob
+      mu += sample*prob
+      musq += (sample^2)*prob
     end
   end
   mu = mu/length(datasets)
@@ -77,7 +77,7 @@ function get_dataset_unlabelled(p_range,distribution,samples)
   for indxp in 2:length(p_range)
     data,count = prepare_dataset(p_range[indxp],distribution,samples)
     push!(datasets, data)
-    counter+=count
+    counter += count
   end
   return datasets,Int(counter)
 end
@@ -86,17 +86,17 @@ function get_dataset(p_range,distribution,samples)
   dataset_ul,n_unique = get_dataset_unlabelled(p_range,distribution,samples)
 
   dataset = zeros(eltype(p_range[1]),(3,n_unique))
-  count=1
+  count = 1
   len_p_train = 0
   for i in 1:length(dataset_ul)
     data = dataset_ul[i]
-    p=p_range[i]
+    p = p_range[i]
 
     for j in 1:length(data)
       freq = data[j][2]
-      if freq !=zero(eltype(freq))
+      if freq != zero(eltype(freq))
         dataset[:,count] = [data[j][1],freq,i*one(eltype(freq))]
-        count+=1
+        count += 1
       end
     end
   end
@@ -109,7 +109,7 @@ function get_dataset_proto(p_range,distribution,samples)
   for i in 1:length(p_range)
     for j in 1:length(samples)
       dataset[:,count] = [j,distribution(samples[j],p_range[i]),i]
-      count+=1
+      count += 1
     end
   end
   return dataset
@@ -152,7 +152,7 @@ function get_training_data_SL(dataset_SL,p_range,p_max,p_min)
   train = [dataset_SL[:,1]]
   for i in 2:size(dataset_SL)[2]
     ele = dataset_SL[:,i]
-    if p_range[Int(ele[3])] <= p_min || p_range[Int(ele[3])]>= p_max
+    if p_range[Int(ele[3])] <= p_min || p_range[Int(ele[3])] >= p_max
       push!(train,ele)
     end
   end
@@ -180,7 +180,7 @@ function get_modified_dataset_train_SL(distr,samples,p_range,n_samples;gs_index=
     prob = Int(round(distr(sample,p_range[end])*n_samples))
     if prob == zero(eltype(p_range[1]))
       prob = one(eltype(p_range[1]))
-      num_samples +=one(eltype(n_samples))
+      num_samples += one(eltype(n_samples))
     end
     p = length(p_range)
 
@@ -195,14 +195,14 @@ end
 function get_unmodified_dataset_train_SL(distr,samples,p_range,n_samples)
   new_dataset_train_SL = zeros(eltype(p_range[1]),(3,1+length(samples)))
 
-  new_dataset_train_SL[:,1]=[samples[1],distr(samples[1],p_range[1]),1]
+  new_dataset_train_SL[:,1] = [samples[1],distr(samples[1],p_range[1]),1]
 
   for indx in collect(1:length(samples))
     sample = samples[indx]
     prob = distr(sample,p_range[end])
     p = length(p_range)
 
-    new_dataset_train_SL[:,indx+1]=[sample,prob,p]
+    new_dataset_train_SL[:,indx+1] = [sample,prob,p]
   end
 
   new_dataset_train_SL[2,2:end] = new_dataset_train_SL[2,2:end]
@@ -212,7 +212,7 @@ end
 
 function get_batches(indices,batchsize,batch)
   if batch*batchsize > length(indices)
-    if (batch-1)*batchsize+1>length(indices)
+    if (batch-1)*batchsize+1 > length(indices)
       error("batchsize too large")
     else
       return indices[1+batchsize*(batch-1):end]
@@ -224,20 +224,20 @@ end
 
 function five_point_stencil(y,dp)
   derivative = zeros(length(y)-4)
-  i=1
+  i = 1
   for index in 3:length(y)-2
     derivative[i] = (y[index-2]-8*y[index-1]+8*y[index+1]-y[index+2])/(12*dp)
-    i+=1
+    i += 1
   end
   return derivative
 end
 
 function get_dataset_stats(dataset,inputs,n_points)
   mu = zeros(eltype(dataset[2,1]),size(inputs)[1])
-  musq =zeros(eltype(dataset[2,1]),size(inputs)[1])
+  musq = zeros(eltype(dataset[2,1]),size(inputs)[1])
   for indx in collect(1:size(dataset)[2])
-    mu.+= dataset[2,indx]*inputs[Int(dataset[1,indx])]
-    musq.+= dataset[2,indx]*inputs[Int(dataset[1,indx])]^2
+    mu .+= dataset[2,indx]*inputs[Int(dataset[1,indx])]
+    musq .+= dataset[2,indx]*inputs[Int(dataset[1,indx])]^2
   end
   mu = mu./n_points
   musq = musq./n_points

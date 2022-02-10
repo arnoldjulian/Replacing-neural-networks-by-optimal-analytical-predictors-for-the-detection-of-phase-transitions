@@ -16,14 +16,14 @@ function get_pred_opt_x_SL!(x, distribution, p_range_1, p_range_2,SLc)
   cP2[1] = zero(eltype(cP2))
 
   for p in p_range_1
-    cP1[1] +=distribution(x,p)
+    cP1[1] += distribution(x,p)
   end
 
   for p in p_range_2
-    cP2[1] +=distribution(x,p)
+    cP2[1] += distribution(x,p)
   end
 
-  if cP1[1]+cP2[1] == zero(eltype(cP2[1]))
+  if cP1[1] + cP2[1] == zero(eltype(cP2[1]))
     return zero(eltype(cP2[1]))
   else
     return cP1[1]/(cP1[1]+cP2[1])
@@ -32,10 +32,10 @@ function get_pred_opt_x_SL!(x, distribution, p_range_1, p_range_2,SLc)
 end
 
 function l_add!(p_min, p_max, p_tar, cweight,clabel)
-  if p_tar <=p_min
+  if p_tar <= p_min
     cweight[1] = one(eltype(cweight[1]))
     clabel[1]  = one(eltype(clabel[1]))
-  elseif p_tar >=p_max
+  elseif p_tar >= p_max
     cweight[1] = one(eltype(cweight[1]))
     clabel[1]  = zero(eltype(clabel[1]))
   else
@@ -51,7 +51,7 @@ function get_pred_opt_p_SL!(samples, distribution, p_range_1, p_range_2, p_tar,S
   cres[1] = zero(eltype(cres[1]))
 
   l_add!(p_range_1[end], p_range_2[1], p_tar,cweight,clabel)
-  cres[3] = cres[3]+cweight[1]
+  cres[3] = cres[3] + cweight[1]
   for x in samples
     cprob[1] = distribution(x,p_tar)
     cpredx[1] = get_pred_opt_x_SL!(x, distribution, p_range_1, p_range_2, SLc)
@@ -62,7 +62,7 @@ function get_pred_opt_p_SL!(samples, distribution, p_range_1, p_range_2, p_tar,S
 
     # loss += prob*(pred_x-label)^2
     # loss += prob*Flux.crossentropy([pred_x,1-pred_x], [label,1-label])
-    cres[2]+=cweight[1]*cprob[1]*crossentropy(cpredx[1],clabel[1])
+    cres[2] += cweight[1]*cprob[1]*crossentropy(cpredx[1],clabel[1])
   end
   return nothing
 end
@@ -97,7 +97,7 @@ function get_indicators_SL_analytical(samples, distribution, p_range, dp, p_min,
   cres3 = zero(eltype(dp))
   for i in 1:Threads.nthreads()
     cres2 += caches[i].cres[2]
-    cres3 +=caches[i].cres[3]
+    cres3 += caches[i].cres[3]
   end
 
 
@@ -150,9 +150,9 @@ function get_loss_opt_SL(samples, distribution, p_range, p_min, p_max, loss_type
           error("Your loss function is currently not supported.")
         end
 
-        loss_p +=distribution(x,p)*loss_x
+        loss_p += distribution(x,p)*loss_x
       end
-      loss+=loss_p
+      loss += loss_p
     end
   end
 
@@ -169,13 +169,13 @@ function main_loss_SL_weighted(NN,pnn,data,p_range,p_min,p_max,inputs)
   input = inputs[:,indices]
 
   pred = NN(pnn)(input)
-  pred=Flux.softmax(pred)
+  pred = Flux.softmax(pred)
   loss = zero(eltype(p_range[1]))
   for i in 1:size(pred)[2]
     if p_range[Int(data[3,i])] <=p_min
-      loss+= data[2,i]*MLP.crossentropy(pred[1,i],one(eltype(loss)))
+      loss += data[2,i]*MLP.crossentropy(pred[1,i],one(eltype(loss)))
     elseif p_range[Int(data[3,i])] >=p_max
-      loss+= data[2,i]*MLP.crossentropy(pred[1,i],zero(eltype(loss)))
+      loss += data[2,i]*MLP.crossentropy(pred[1,i],zero(eltype(loss)))
     else
       error("wrong asignment of training data")
     end
@@ -189,13 +189,13 @@ function main_loss_SL_stochastic(NN,pnn,data,p_range,p_min,p_max,inputs)
   input = inputs[:,indices]
 
   pred = NN(pnn)(input)
-  pred=Flux.softmax(pred)
+  pred = Flux.softmax(pred)
   loss = zero(eltype(p_range[1]))
   for i in 1:size(pred)[2]
     if p_range[Int(data[3,i])] <=p_min
-      loss+= MLP.crossentropy(pred[1,i],one(eltype(loss)))
+      loss += MLP.crossentropy(pred[1,i],one(eltype(loss)))
     elseif p_range[Int(data[3,i])] >=p_max
-      loss+= MLP.crossentropy(pred[1,i],zero(eltype(loss)))
+      loss += MLP.crossentropy(pred[1,i],zero(eltype(loss)))
     else
       error("wrong asignment of training data")
     end
@@ -209,16 +209,16 @@ function main_loss_SL_opt(NN,pnn,data,p_range,p_min,p_max,inputs)
   input = inputs[:,indices]
 
   pred = NN(pnn)(input)
-  pred=Flux.softmax(pred)
+  pred =Flux.softmax(pred)
   loss = zero(eltype(p_range[1]))
   for i in 1:size(pred)[2]
-    loss+= MLP.crossentropy(pred[1,i],data[2,i])
+    loss += MLP.crossentropy(pred[1,i],data[2,i])
   end
   # return loss + 0.0001*sum(MLP.sqnorm, pnn)
   return loss/length(data[1,:])
 end
 
-function train_SL_weighted(NN,pnn,data_train,data_test,epochs,p_range,dp,p_min,p_max,opt,batchsize,n_batches_train,n_batches_test,len_p_train,inputs;verbose=false,saveat=epochs)
+function train_SL_weighted(NN,pnn,data_train,data_test,epochs,p_range,dp,p_min,p_max,opt,batchsize,n_batches_train,n_batches_test,len_p_train,inputs;verbose = false,saveat = epochs)
   NN_logger = [zeros(eltype(p_range[1]),length(pnn))]
   pred_logger = [(zeros(eltype(p_range[1]),length(p_range)),zeros(eltype(p_range[1]),length(p_range)-2),zeros(eltype(p_range[1]),1))]
 
@@ -349,7 +349,7 @@ function predict_SL(data_train,data_test,p_range,p_min,p_max,dp,NN,pnn,batchsize
     input = inputs[:,indicess]
 
     pred = NN(pnn)(input)
-    pred=Flux.softmax(pred)
+    pred = Flux.softmax(pred)
     for indxp in 1:length(rand_int)
       predictions[Int(data[3,indxp])] += data[2,indxp]*pred[1,indxp]
     end

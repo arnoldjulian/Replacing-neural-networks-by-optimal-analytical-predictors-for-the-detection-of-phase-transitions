@@ -11,8 +11,8 @@ using Random
 ENV["GKSwstype"]="nul"
 
 # set linear system size and corresponding data folder
-L=8
-# L=8
+L = 6
+# L = 8
 data_folder = "../../data/mbl_bose_hubbard/L="*string(L)*"/"
 
 # set path to save folder
@@ -26,7 +26,7 @@ p_crit2 = 7.0
 p_min = 0.1
 p_max = 20.0
 n_points = 200
-p_range=collect(LinRange(p_min, p_max, n_points))
+p_range = collect(LinRange(p_min, p_max, n_points))
 dp = p_range[2]-p_range[1]
 p_range_LBC = collect(p_min-dp/2:dp:p_max+dp/2)
 

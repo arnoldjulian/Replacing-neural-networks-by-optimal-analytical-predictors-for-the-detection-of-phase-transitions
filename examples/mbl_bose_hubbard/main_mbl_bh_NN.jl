@@ -12,8 +12,8 @@ using Flux
 ENV["GKSwstype"]="nul"
 
 # set linear system size and corresponding data folder
-L=6
-# L=8
+L = 6
+# L = 8
 data_folder = "../../data/mbl_bose_hubbard/L="*string(L)*"/"
 
 # set path to save folder
@@ -27,7 +27,7 @@ p_crit2 = 7.0
 p_min = 0.1
 p_max = 20.0
 n_points = 200
-p_range=collect(LinRange(p_min, p_max, n_points))
+p_range = collect(LinRange(p_min, p_max, n_points))
 dp = p_range[2]-p_range[1]
 p_range_LBC = collect(p_min-dp/2:dp:p_max+dp/2)
 
@@ -83,7 +83,7 @@ inputs_one_hot_stand_SL = (inputs_one_hot.-mean_train_SL)./std_train_SL
 # supervised learning using neural networks
 
 # initialize neural network
-n_nodes_SL=[size(inputs_one_hot)[1],128,128,64,64,64,2]
+n_nodes_SL = [size(inputs_one_hot)[1],128,128,64,64,64,2]
 NN_SL = Chain(
   Dense(n_nodes_SL[1], n_nodes_SL[2], relu),
   Dense(n_nodes_SL[2], n_nodes_SL[3], relu),
@@ -96,7 +96,7 @@ pnn_SL, re_SL = Flux.destructure(NN_SL)
 # set hyperparameters
 lr_SL = 0.001f0
 epochs_SL = 1000
-saveat_SL=100
+saveat_SL = 100
 opt_SL = ADAM(lr_SL)
 verbose = true
 
@@ -178,7 +178,7 @@ savefig(save_folder*"loss_NN_SL.png")
 # prediction-based method using neural networks
 
 # initialize neural network
-n_nodes_PBM=[size(inputs_one_hot)[1],128,128,64,64,64,1]
+n_nodes_PBM = [size(inputs_one_hot)[1],128,128,64,64,64,1]
 NN_PBM = Chain(
   Dense(n_nodes_PBM[1], n_nodes_PBM[2], relu),
   Dense(n_nodes_PBM[2], n_nodes_PBM[3], relu),
@@ -191,13 +191,13 @@ pnn_PBM, re_PBM = Flux.destructure(NN_PBM)
 # set hyperparameters
 lr_PBM = 0.001f0
 epochs_PBM = 1000
-saveat_PBM=100
+saveat_PBM = 100
 opt_PBM = ADAM(lr_PBM)
 verbose = true
 
 # train neural network
 # returns predictions, indicators, and loss saved at epochs specified by saveat_PBM variable
-pred_logger_PBM, losses_PBM, NN_logger_PBM =MLP.get_indicators_PBM_numerical(pnn_PBM,re_PBM,dataset,epochs_PBM,p_range,dp,opt_PBM,inputs_one_hot_stand,verbose=verbose,saveat=saveat_PBM)
+pred_logger_PBM, losses_PBM, NN_logger_PBM = MLP.get_indicators_PBM_numerical(pnn_PBM,re_PBM,dataset,epochs_PBM,p_range,dp,opt_PBM,inputs_one_hot_stand,verbose=verbose,saveat=saveat_PBM)
 
 # extract results at last save point
 pred_NN_PBM = pred_logger_PBM[end][1]
@@ -273,7 +273,7 @@ savefig(save_folder*"loss_NN_PBM.png")
 # learning by confusion using neural networks
 
 # initialize neural network
-n_nodes_LBC=[size(inputs_one_hot)[1],128,128,64,64,64,2]
+n_nodes_LBC = [size(inputs_one_hot)[1],128,128,64,64,64,2]
 NN_LBC = Chain(
   Dense(n_nodes_LBC[1], n_nodes_LBC[2], relu),
   Dense(n_nodes_LBC[2], n_nodes_LBC[3], relu),

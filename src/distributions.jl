@@ -14,7 +14,7 @@ function jump_distr(;p_crit=1.0f0)
       end
     end
   end
-  samples=[0,1]
+  samples = [0,1]
   return (x,p)->stepfunc(x,p,p_crit), samples
 end
 
@@ -22,7 +22,7 @@ function constant_distr()
   function uniform(x,p)
     return 0.5f0
   end
-  samples=[0,1]
+  samples = [0,1]
   return uniform, samples
 end
 
@@ -34,20 +34,20 @@ function continuous_distr()
       return 0.5*(tanh(p)+1)
     end
   end
-  samples=[0,1]
+  samples = [0,1]
   return paramagnet_distr, samples
 end
 
-function tilt_distr(p_range;p_crit=2.0f0)
+function tilt_distr(p_range;p_crit = 2.0f0)
   function tilt(p,p_crit)
     a_left = -1.0f0
     b_left = 5.0f0
-    a_right = - 1.0f0
+    a_right = -1.0f0
     b_right = 2.0f0
     if p <= p_crit
-      x=a_left*p+b_left
+      x = a_left*p+b_left
     else
-      x=a_right*p+b_right
+      x = a_right*p+b_right
     end
 
     return x
@@ -127,7 +127,7 @@ function distr_approx(energies,unique_energies,numbers,p_range)
         full_data[i,j] = zero(eltype(sample))
       else
         full_data[i,j] = number_list[indices[1]]
-        numtot+=number_list[indices[1]]
+        numtot += number_list[indices[1]]
       end
     end
     full_data[i,:] = full_data[i,:]/numtot
@@ -149,7 +149,7 @@ function distr_approx_numerical(energies,unique_energies,numbers,p_range)
         full_data[i,j] = zero(eltype(sample))
       else
         full_data[i,j] = number_list[indices[1]]
-        numtot+=number_list[indices[1]]
+        numtot += number_list[indices[1]]
       end
     end
     full_data[i,:] = full_data[i,:]/numtot

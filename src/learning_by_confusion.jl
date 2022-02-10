@@ -22,7 +22,7 @@ function get_pred_opt_x_LBC!(x, distribution, p_range, p_tar, LBCc)
     end
   end
 
-  if cP1[1]+cP2[1] == zero(eltype(cP1[1]))
+  if cP1[1] + cP2[1] == zero(eltype(cP1[1]))
     # println(x)
     # println(cP1[1]+cP2[1])
     # error("This sample is not contained in the data...")
@@ -39,7 +39,7 @@ function get_e_opt_p_LBC!(samples, distribution, p_range, p_tar, LBCc)
   cres[1] = zero(eltype(cres[1]))
   cres[2] = zero(eltype(cres[2]))
   for p in p_range
-    if p<=p_tar
+    if p <= p_tar
       clabel[1] = one(eltype(clabel[1]))
     else
       clabel[1] = zero(eltype(clabel[1]))
@@ -136,7 +136,7 @@ function get_loss_opt_p_LBC(samples, distribution, p_range, p_tar, loss_type)
     for x in samples
       pred = get_pred_opt_x_LBC(x, distribution, p_range, p_tar)
 
-      if p<=p_tar
+      if p <= p_tar
         label = one(eltype(p_tar))
       else
         label = zero(eltype(p_tar))
@@ -151,7 +151,7 @@ function get_loss_opt_p_LBC(samples, distribution, p_range, p_tar, loss_type)
         error("Your loss function is currently not supported.")
       end
 
-      loss +=distribution(x,p)*loss_x
+      loss += distribution(x,p)*loss_x
     end
   end
   return loss/length(p_range)
@@ -166,13 +166,13 @@ function main_loss_LBC_weighted(NN,pnn,dataset,p_tar,p_range,inputs)
   input = inputs[:,indices]
 
   pred = NN(pnn)(input)
-  pred=Flux.softmax(pred)
+  pred = Flux.softmax(pred)
   loss = zero(eltype(p_tar))
   for i in 1:size(pred)[2]
-    if p_range[Int(dataset[3,i])]<=p_tar
-      loss+= dataset[2,i]*MLP.crossentropy(pred[1,i],one(eltype(pred[1,i])))
+    if p_range[Int(dataset[3,i])] <= p_tar
+      loss += dataset[2,i]*MLP.crossentropy(pred[1,i],one(eltype(pred[1,i])))
     else
-      loss+= dataset[2,i]*MLP.crossentropy(pred[1,i],zero(eltype(pred[1,i])))
+      loss += dataset[2,i]*MLP.crossentropy(pred[1,i],zero(eltype(pred[1,i])))
     end
   end
   return loss
@@ -186,10 +186,10 @@ function main_loss_LBC_stochastic(NN,pnn,dataset,p_tar,p_range,inputs)
   pred=Flux.softmax(pred)
   loss = zero(eltype(p_tar))
   for i in 1:size(pred)[2]
-    if p_range[Int(dataset[3,i])]<=p_tar
-      loss+=MLP.crossentropy(pred[1,i],one(eltype(pred[1,i])))
+    if p_range[Int(dataset[3,i])] <= p_tar
+      loss += MLP.crossentropy(pred[1,i],one(eltype(pred[1,i])))
     else
-      loss+=MLP.crossentropy(pred[1,i],zero(eltype(pred[1,i])))
+      loss += MLP.crossentropy(pred[1,i],zero(eltype(pred[1,i])))
     end
   end
   return loss/length(dataset[1,:])
@@ -215,7 +215,7 @@ function train_LBC_weighted(NN,pnn,dataset,epochs,p_range,opt,p_tar,batchsize,n_
       losses[epoch] += val
     end
     Flux.Optimise.update!(opt, pnn, grad./length(p_range))
-    losses[epoch] =losses[epoch]/length(p_range)
+    losses[epoch] = losses[epoch]/length(p_range)
 
     if epoch == 1
       best_loss = losses[epoch]
@@ -255,7 +255,7 @@ function train_LBC_stochastic(NN,pnn,dataset,epochs,p_range,opt,p_tar,batchsize,
       Flux.Optimise.update!(opt, pnn, grad)
       losses[epoch] += val
     end
-    losses[epoch] =losses[epoch]/n_batches_stochastic
+    losses[epoch] = losses[epoch]/n_batches_stochastic
 
     if epoch == 1
       best_loss = losses[epoch]

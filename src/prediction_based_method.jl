@@ -290,11 +290,11 @@ function get_indicators_PBM_numerical(pnn,NN,dataset,epochs,p_range,dp,opt,input
 
   if !trained
     if stochastic
-      losses, NN_logger, pred_logger = train_PBM_stochastic(NN,pnn,dataset,epochs,p_range,dp,opt,batchsize,batchsize_stochastic,n_batches,n_batches_train_stochastic,inputs,verbose=verbose,saveat=saveat)
+      losses, NN_logger, pred_logger = train_PBM_stochastic(NN,pnn,dataset,epochs,p_range,dp,opt,batchsize,batchsize_stochastic,n_batches,n_batches_train_stochastic,inputs,verbose = verbose,saveat = saveat)
     elseif train_opt
-      losses, NN_logger, pred_logger = train_PBM_opt(NN,pnn,dataset,dataset_train,epochs,p_range,dp,opt,batchsize,batchsize_stochastic,n_batches,n_batches_train_stochastic,inputs,verbose=verbose,saveat=saveat)
+      losses, NN_logger, pred_logger = train_PBM_opt(NN,pnn,dataset,dataset_train,epochs,p_range,dp,opt,batchsize,batchsize_stochastic,n_batches,n_batches_train_stochastic,inputs,verbose=verbose,saveat = saveat)
     else
-      losses, NN_logger, pred_logger = train_PBM_weighted(NN,pnn,dataset,epochs,p_range,dp,opt,batchsize,n_batches,inputs,verbose=verbose,saveat=saveat)
+      losses, NN_logger, pred_logger = train_PBM_weighted(NN,pnn,dataset,epochs,p_range,dp,opt,batchsize,n_batches,inputs,verbose = verbose,saveat = saveat)
     end
 
     pred_logger = pred_logger[2:end]
@@ -303,7 +303,7 @@ function get_indicators_PBM_numerical(pnn,NN,dataset,epochs,p_range,dp,opt,input
 
     # predictions, indicator = predict_PBM(dataset,p_range,trained_pnn,dp,NN,batchsize,n_batches)
   else
-    predictions, indicator, loss = predict_PBM(dataset,p_range,pnn,dp,NN,batchsize,n_batches,inputs,calc_loss=true)
+    predictions, indicator, loss = predict_PBM(dataset,p_range,pnn,dp,NN,batchsize,n_batches,inputs,calc_loss = true)
     losses = zeros(eltype(dp),epochs)
     NN_logger = [pnn]
     pred_logger = [(predictions,indicator,loss)]

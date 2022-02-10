@@ -13,11 +13,6 @@ using DelimitedFiles
 using Random
 using Base.Threads
 
-# using LinearAlgebra
-# using Plots, DelimitedFiles, LaTeXStrings
-# using DiffEqFlux, Flux, Zygote
-# using Random
-
 include("supervised_learning.jl")
 include("learning_by_confusion.jl")
 include("prediction_based_method.jl")

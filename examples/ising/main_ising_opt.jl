@@ -11,7 +11,7 @@ using Random
 ENV["GKSwstype"]="nul"
 
 # set linear system size and corresponding data folder
-L=60
+L = 60
 # L=60
 data_folder = "../../data/ising/L="*string(L)*"/"
 
@@ -22,9 +22,9 @@ save_folder = "./results/L="*string(L)*"/"
 p_crit = Float32(2/log(1+sqrt(2)))
 
 # define parameter ranges
-p_min=0.05f0
+p_min = 0.05f0
 p_max = 10.0f0
-dp=0.05f0
+dp = 0.05f0
 p_range = collect(p_min:dp:p_max)
 p_range_LBC = collect(p_min-dp/2:dp:p_max+dp/2)
 

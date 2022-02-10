@@ -14,9 +14,9 @@ ENV["GKSwstype"]="nul"
 save_folder = "./results/"
 
 # define parameter ranges
-p_min=0.1f0
+p_min = 0.1f0
 p_max = 3.0f0
-dp=0.05f0
+dp = 0.05f0
 p_range = collect(p_min:dp:p_max)
 p_range_LBC = collect(p_min-dp/2:dp:p_max+dp/2)
 
