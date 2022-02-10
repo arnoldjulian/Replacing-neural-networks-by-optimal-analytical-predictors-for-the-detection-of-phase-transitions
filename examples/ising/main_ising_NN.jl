@@ -41,7 +41,7 @@ num = readdlm(data_folder*"num_T="*string(0)*".txt",eltype(dp))
 energies=[energy]
 numbers=[num]
 for index in 1:length(p_range)-1
-    energyy = readdlm(data_folder*"E_T="*string(index)*".txt",eltype(dp))
+		energyy = readdlm(data_folder*"E_T="*string(index)*".txt",eltype(dp))
     numm = readdlm(data_folder*"num_T="*string(index)*".txt",eltype(dp))
     push!(energies,energyy)
     push!(numbers,numm)
