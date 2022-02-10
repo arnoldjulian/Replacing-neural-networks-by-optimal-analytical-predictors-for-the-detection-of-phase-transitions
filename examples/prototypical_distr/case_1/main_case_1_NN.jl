@@ -55,8 +55,8 @@ inputs_one_hot_stand_SL = (inputs_one_hot.-mean_train_SL)./std_train_SL
 # initialize neural network
 n_nodes_SL=[size(inputs_one_hot)[1],64,2]
 NN_SL = Chain(
-	Dense(n_nodes_SL[1], n_nodes_SL[2], relu),
-	Dense(n_nodes_SL[2], n_nodes_SL[end], identity))
+    Dense(n_nodes_SL[1], n_nodes_SL[2], relu),
+    Dense(n_nodes_SL[2], n_nodes_SL[end], identity))
 pnn_SL, re_SL = Flux.destructure(NN_SL)
 
 # set hyperparameters
@@ -77,46 +77,46 @@ loss_NN_SL = pred_logger_SL[end][3]
 
 # save results of supervised learning in save_folder
 open(save_folder*"hyperparams_SL.txt", "w") do io
-	writedlm(io, [saveat_SL, lr_SL, epochs_SL])
+    writedlm(io, [saveat_SL, lr_SL, epochs_SL])
 end
 
 open(save_folder*"NN_logger_SL.txt", "w") do io
-	writedlm(io, NN_logger_SL)
+    writedlm(io, NN_logger_SL)
 end
 
 for i in 1:length(pred_logger_SL)
-	open(save_folder*"pred_logger_SL_"*string(i)*".txt", "w") do io
-		writedlm(io, pred_logger_SL[i][1])
-	end
+    open(save_folder*"pred_logger_SL_"*string(i)*".txt", "w") do io
+        writedlm(io, pred_logger_SL[i][1])
+    end
 
-	open(save_folder*"indicator_logger_SL_"*string(i)*".txt", "w") do io
-		writedlm(io, pred_logger_SL[i][2])
-	end
+    open(save_folder*"indicator_logger_SL_"*string(i)*".txt", "w") do io
+        writedlm(io, pred_logger_SL[i][2])
+    end
 
-	open(save_folder*"loss_logger_SL_"*string(i)*".txt", "w") do io
-		writedlm(io, pred_logger_SL[i][3])
-	end
+    open(save_folder*"loss_logger_SL_"*string(i)*".txt", "w") do io
+        writedlm(io, pred_logger_SL[i][3])
+    end
 
 end
 
 open(save_folder*"pred_NN_SL.txt", "w") do io
-	writedlm(io, pred_NN_SL)
+    writedlm(io, pred_NN_SL)
 end
 
 open(save_folder*"indicator_NN_SL.txt", "w") do io
-	writedlm(io, indicator_NN_SL)
+    writedlm(io, indicator_NN_SL)
 end
 
 open(save_folder*"loss_NN_SL.txt", "w") do io
-	writedlm(io, loss_NN_SL)
+    writedlm(io, loss_NN_SL)
 end
 
 open(save_folder*"NN_structure_SL.txt", "w") do io
-	writedlm(io, n_nodes_SL)
+    writedlm(io, n_nodes_SL)
 end
 
 open(save_folder*"losses_SL.txt", "w") do io
-	writedlm(io, losses_SL)
+    writedlm(io, losses_SL)
 end
 
 # plot and save results of supervised learning in save_folder
@@ -144,8 +144,8 @@ savefig(save_folder*"loss_NN_SL.png")
 # initialize neural network
 n_nodes_PBM = [size(inputs_one_hot)[1],64,1]
 NN_PBM = Chain(
-	Dense(n_nodes_PBM[1], n_nodes_PBM[2], relu),
-	Dense(n_nodes_PBM[2], n_nodes_PBM[end], identity))
+    Dense(n_nodes_PBM[1], n_nodes_PBM[2], relu),
+    Dense(n_nodes_PBM[2], n_nodes_PBM[end], identity))
 pnn_PBM, re_PBM = Flux.destructure(NN_PBM)
 
 # set hyperparameters
@@ -166,46 +166,46 @@ loss_NN_PBM = pred_logger_PBM[end][3]
 
 # save results of prediction-based method in save_folder
 open(save_folder*"hyperparams_PBM.txt", "w") do io
-	writedlm(io, [saveat_PBM, lr_PBM, epochs_PBM])
+    writedlm(io, [saveat_PBM, lr_PBM, epochs_PBM])
 end
 
 open(save_folder*"NN_logger_PBM.txt", "w") do io
-	writedlm(io, NN_logger_PBM)
+    writedlm(io, NN_logger_PBM)
 end
 
 for i in 1:length(pred_logger_PBM)
-	open(save_folder*"pred_logger_PBM_"*string(i)*".txt", "w") do io
-		writedlm(io, pred_logger_PBM[i][1])
-	end
+    open(save_folder*"pred_logger_PBM_"*string(i)*".txt", "w") do io
+        writedlm(io, pred_logger_PBM[i][1])
+    end
 
-	open(save_folder*"indicator_logger_PBM_"*string(i)*".txt", "w") do io
-		writedlm(io, pred_logger_PBM[i][2])
-	end
+    open(save_folder*"indicator_logger_PBM_"*string(i)*".txt", "w") do io
+        writedlm(io, pred_logger_PBM[i][2])
+    end
 
-	open(save_folder*"loss_logger_PBM_"*string(i)*".txt", "w") do io
-		writedlm(io, pred_logger_PBM[i][3])
-	end
+    open(save_folder*"loss_logger_PBM_"*string(i)*".txt", "w") do io
+        writedlm(io, pred_logger_PBM[i][3])
+    end
 
 end
 
 open(save_folder*"pred_NN_PBM.txt", "w") do io
-	writedlm(io, pred_NN_PBM)
+    writedlm(io, pred_NN_PBM)
 end
 
 open(save_folder*"indicator_NN_PBM.txt", "w") do io
-	writedlm(io, indicator_NN_PBM)
+    writedlm(io, indicator_NN_PBM)
 end
 
 open(save_folder*"loss_NN_PBM.txt", "w") do io
-	writedlm(io, loss_NN_PBM)
+    writedlm(io, loss_NN_PBM)
 end
 
 open(save_folder*"NN_structure_PBM.txt", "w") do io
-	writedlm(io, n_nodes_PBM)
+    writedlm(io, n_nodes_PBM)
 end
 
 open(save_folder*"losses_PBM.txt", "w") do io
-	writedlm(io, losses_PBM)
+    writedlm(io, losses_PBM)
 end
 
 # plot and save results of prediction-based method in save_folder
@@ -233,8 +233,8 @@ savefig(save_folder*"loss_NN_PBM.png")
 # initialize neural network
 n_nodes_LBC=[size(inputs_one_hot)[1],64,2]
 NN_LBC = Chain(
-	Dense(n_nodes_LBC[1], n_nodes_LBC[2], relu),
-	Dense(n_nodes_LBC[2], n_nodes_LBC[end], identity))
+    Dense(n_nodes_LBC[1], n_nodes_LBC[2], relu),
+    Dense(n_nodes_LBC[2], n_nodes_LBC[end], identity))
 pnn_LBC, re_LBC = Flux.destructure(NN_LBC)
 
 # set hyperparameters
@@ -247,29 +247,29 @@ verbose = true
 indicator_NN_LBC = []
 loss_NN_LBC = []
 for indx in collect(1:length(p_range_LBC))
-	pred_logger_LBC, losses_LBC, NN_logger_LBC = MLP.get_indicators_LBC_numerical_fixed_p(deepcopy(pnn_LBC),re_LBC,dataset,epochs_LBC,p_range,dp,opt_LBC,p_range_LBC,indx,inputs_one_hot_stand,saveat=saveat_LBC,verbose=verbose)
+    pred_logger_LBC, losses_LBC, NN_logger_LBC = MLP.get_indicators_LBC_numerical_fixed_p(deepcopy(pnn_LBC),re_LBC,dataset,epochs_LBC,p_range,dp,opt_LBC,p_range_LBC,indx,inputs_one_hot_stand,saveat=saveat_LBC,verbose=verbose)
 
-	indicator_NN_LBC_p = pred_logger_LBC[end][1][1]
-	push!(indicator_NN_LBC,indicator_NN_LBC_p)
-	loss_NN_LBC_p = pred_logger_LBC[end][2][1]
-	push!(loss_NN_LBC,loss_NN_LBC_p)
+    indicator_NN_LBC_p = pred_logger_LBC[end][1][1]
+    push!(indicator_NN_LBC,indicator_NN_LBC_p)
+    loss_NN_LBC_p = pred_logger_LBC[end][2][1]
+    push!(loss_NN_LBC,loss_NN_LBC_p)
 end
 
 # save results of learning by confusion in save_folder
 open(save_folder*"hyperparams_LBC.txt", "w") do io
-	writedlm(io, [saveat_LBC, lr_LBC, epochs_LBC])
+    writedlm(io, [saveat_LBC, lr_LBC, epochs_LBC])
 end
 
 open(save_folder*"indicator_NN_LBC.txt", "w") do io
-	writedlm(io, indicator_NN_LBC)
+    writedlm(io, indicator_NN_LBC)
 end
 
 open(save_folder*"loss_NN_LBC.txt", "w") do io
-	writedlm(io, loss_NN_LBC)
+    writedlm(io, loss_NN_LBC)
 end
 
 open(save_folder*"NN_structure_LBC.txt", "w") do io
-	writedlm(io, n_nodes_LBC)
+    writedlm(io, n_nodes_LBC)
 end
 
 # plot and save results of learning by confusion in save_folder

@@ -38,8 +38,8 @@ prob = vcat(readdlm(data_folder*"probs_W="*string(1)*".txt")...)
 # iterate over entire parameter range
 probss = [prob]
 for index in 2:201-1
-	probb = vcat(readdlm(data_folder*"probs_W="*string(index)*".txt")...)
-	push!(probss,probb)
+    probb = vcat(readdlm(data_folder*"probs_W="*string(index)*".txt")...)
+    push!(probss,probb)
 end
 samples = collect(1:length(probss[1]))
 n_samples = length(samples)
@@ -48,8 +48,8 @@ n_samples = length(samples)
 # distr(x,p) gives probability to draw the sample x at parameter value p
 # samples correspond to enumeration of unique basis states with integers
 function distribution(sample,p,p_range,probss)
-	p_indx = Int(round((p-p_range[1])/(p_range[2]-p_range[1])))+1
-	return probss[p_indx][Int(sample)]
+    p_indx = Int(round((p-p_range[1])/(p_range[2]-p_range[1])))+1
+    return probss[p_indx][Int(sample)]
 end
 distr = (x,p)->distribution(x,p,p_range,probss)
 
@@ -67,47 +67,47 @@ indicator_opt_LBC, loss_opt_LBC = MLP.get_indicators_LBC_analytical(samples, dis
 
 # save output in save_folder
 open(save_folder*"p_range_SL.txt", "w") do io
-	writedlm(io, p_range)
+    writedlm(io, p_range)
 end
 
 open(save_folder*"p_range_PBM.txt", "w") do io
-	writedlm(io, p_range)
+    writedlm(io, p_range)
 end
 
 open(save_folder*"p_range_LBC.txt", "w") do io
-	writedlm(io, p_range_LBC)
+    writedlm(io, p_range_LBC)
 end
 
 open(save_folder*"pred_opt_SL.txt", "w") do io
-	writedlm(io, pred_opt_SL)
+    writedlm(io, pred_opt_SL)
 end
 
 open(save_folder*"indicator_opt_SL.txt", "w") do io
-	writedlm(io, indicator_opt_SL)
+    writedlm(io, indicator_opt_SL)
 end
 
 open(save_folder*"loss_opt_SL.txt", "w") do io
-	writedlm(io, [loss_opt_SL])
+    writedlm(io, [loss_opt_SL])
 end
 
 open(save_folder*"pred_opt_PBM.txt", "w") do io
-	writedlm(io, pred_opt_PBM)
+    writedlm(io, pred_opt_PBM)
 end
 
 open(save_folder*"indicator_opt_PBM.txt", "w") do io
-	writedlm(io, indicator_opt_PBM)
+    writedlm(io, indicator_opt_PBM)
 end
 
 open(save_folder*"loss_opt_PBM.txt", "w") do io
-	writedlm(io, [loss_opt_PBM])
+    writedlm(io, [loss_opt_PBM])
 end
 
 open(save_folder*"indicator_opt_LBC.txt", "w") do io
-	writedlm(io, indicator_opt_LBC)
+    writedlm(io, indicator_opt_LBC)
 end
 
 open(save_folder*"loss_opt_LBC.txt", "w") do io
-	writedlm(io, loss_opt_LBC)
+    writedlm(io, loss_opt_LBC)
 end
 
 # plot and save results in save_folder
