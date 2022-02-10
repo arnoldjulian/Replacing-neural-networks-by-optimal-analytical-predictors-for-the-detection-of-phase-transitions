@@ -11,7 +11,9 @@ Identifying phase transitions and classifying phases of matter is central to und
 
 contains code to identify phase transitions from data using supervised learning, learning by confusion, or the prediction-based method, using the optimal analytical expressions or neural networks. We provide exemplary code for
 
-* the symmetry-breaking phase transition in the two-dimensional square lattice ferromagnetic Ising model (of size $L=10$ and $L=60$), see [the file](./continuously-updated-control/Control.jl),
+* the prototypical probability distributions discussed in our paper (case 1, 2, and 3), see [the file](./continuously-updated-control/Control.jl),
+
+* the symmetry-breaking phase transition in the two-dimensional square lattice ferromagnetic Ising model (of size 10 x 10 and 60 x 60), see [the file](./continuously-updated-control/Control.jl),
 
 * and the many-body localization phase transition in the Bose-Hubbard chain, see [the file](./piecewise-constant-control/Control.jl).
 
