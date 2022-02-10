@@ -23,7 +23,7 @@ Other physical systems can be analyzed in the same fashion by encoding the corre
 
 - install [julia](https://julialang.org/downloads/)
 - individual files can be executed by calling, e.g., `julia main_ising_opt.jl`
-- output data/figures are stored in the associated data/figures folder.
+- output data/figures are stored in the associated save folder.
 
 ## Authors:
 
