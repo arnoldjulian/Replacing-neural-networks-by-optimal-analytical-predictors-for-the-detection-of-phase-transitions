@@ -7,7 +7,7 @@ Identifying phase transitions and classifying phases of matter is central to und
 
 
 <p align="center">
-  <img src="./misc/method.png" alt="scheme" height="400px" width="748px">
+  <img src="./misc/method.jpg" alt="scheme" height="400px" width="748px">
 </p>
 
 ### This repository
