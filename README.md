@@ -17,7 +17,7 @@ contains code to identify phase transitions from data using supervised learning,
 
 * and the many-body localization phase transition in the Bose-Hubbard chain (of length 6 and 8), see [the folder](./examples/mbl_bose_hubbard/).
 
-The data used to construct the corresponding probability distributions can be found in the data folder. Other physical systems can be analyzed in the same fashion by encoding the corresponding probability distributions.
+The data used to construct the corresponding probability distributions can be found in the data folder. Other physical systems can be analyzed in the same fashion by replacing the current probability distributions/data.
 
 ### How to run / prerequisites:
 
