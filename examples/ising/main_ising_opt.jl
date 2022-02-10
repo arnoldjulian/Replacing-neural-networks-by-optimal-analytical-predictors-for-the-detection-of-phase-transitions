@@ -40,10 +40,10 @@ num = readdlm(data_folder*"num_T="*string(0)*".txt",eltype(dp))
 energies=[energy]
 numbers=[num]
 for index in 1:length(p_range)-1
-    energyy = readdlm(data_folder*"E_T="*string(index)*".txt",eltype(dp))
-    numm = readdlm(data_folder*"num_T="*string(index)*".txt",eltype(dp))
-    push!(energies,energyy)
-    push!(numbers,numm)
+  energyy = readdlm(data_folder*"E_T="*string(index)*".txt",eltype(dp))
+  numm = readdlm(data_folder*"num_T="*string(index)*".txt",eltype(dp))
+  push!(energies,energyy)
+  push!(numbers,numm)
 end
 unique_energies = unique(vcat(energies...))
 n_samples = sum(numbers[1])
@@ -67,47 +67,47 @@ indicator_opt_LBC, loss_opt_LBC = MLP.get_indicators_LBC_analytical(samples, dis
 
 # save output in save_folder
 open(save_folder*"p_range_SL.txt", "w") do io
-    writedlm(io, p_range)
+  writedlm(io, p_range)
 end
 
 open(save_folder*"p_range_PBM.txt", "w") do io
-    writedlm(io, p_range)
+  writedlm(io, p_range)
 end
 
 open(save_folder*"p_range_LBC.txt", "w") do io
-    writedlm(io, p_range_LBC)
+  writedlm(io, p_range_LBC)
 end
 
 open(save_folder*"pred_opt_SL.txt", "w") do io
-    writedlm(io, pred_opt_SL)
+  writedlm(io, pred_opt_SL)
 end
 
 open(save_folder*"indicator_opt_SL.txt", "w") do io
-    writedlm(io, indicator_opt_SL)
+  writedlm(io, indicator_opt_SL)
 end
 
 open(save_folder*"loss_opt_SL.txt", "w") do io
-    writedlm(io, [loss_opt_SL])
+  writedlm(io, [loss_opt_SL])
 end
 
 open(save_folder*"pred_opt_PBM.txt", "w") do io
-    writedlm(io, pred_opt_PBM)
+  writedlm(io, pred_opt_PBM)
 end
 
 open(save_folder*"indicator_opt_PBM.txt", "w") do io
-    writedlm(io, indicator_opt_PBM)
+  writedlm(io, indicator_opt_PBM)
 end
 
 open(save_folder*"loss_opt_PBM.txt", "w") do io
-    writedlm(io, [loss_opt_PBM])
+  writedlm(io, [loss_opt_PBM])
 end
 
 open(save_folder*"indicator_opt_LBC.txt", "w") do io
-    writedlm(io, indicator_opt_LBC)
+  writedlm(io, indicator_opt_LBC)
 end
 
 open(save_folder*"loss_opt_LBC.txt", "w") do io
-    writedlm(io, loss_opt_LBC)
+  writedlm(io, loss_opt_LBC)
 end
 
 # plot and save results in save_folder
