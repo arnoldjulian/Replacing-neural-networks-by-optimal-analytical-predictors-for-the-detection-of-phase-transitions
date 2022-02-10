@@ -11,18 +11,18 @@ Identifying phase transitions and classifying phases of matter is central to und
 
 contains code to identify phase transitions from data using supervised learning, learning by confusion, or the prediction-based method, using the optimal analytical expressions or neural networks. We provide exemplary code for
 
-* the prototypical probability distributions discussed in our paper (case 1, 2, and 3), see [the file](./continuously-updated-control/Control.jl),
+* the prototypical probability distributions discussed in our paper, see [the folder](./examples/prototypical_distr/),
 
-* the symmetry-breaking phase transition in the two-dimensional square lattice ferromagnetic Ising model (of size 10 x 10 and 60 x 60), see [the file](./continuously-updated-control/Control.jl),
+* the symmetry-breaking phase transition in the two-dimensional square lattice ferromagnetic Ising model (of size 10 x 10 and 60 x 60), see [the folder](./examples/ising/),
 
-* and the many-body localization phase transition in the Bose-Hubbard chain, see [the file](./piecewise-constant-control/Control.jl).
+* and the many-body localization phase transition in the Bose-Hubbard chain (of length 6 and 8), see [the folder](./examples/mbl_bose_hubbard/).
 
 Other physical systems can be analyzed in the same fashion by encoding the corresponding probability distributions.
 
 ### How to run / prerequisites:
 
 - install [julia](https://julialang.org/downloads/)
-- individual files can be executed by calling, e.g., `julia ising_opt.jl`
+- individual files can be executed by calling, e.g., `julia main_ising_opt.jl`
 - output data/figures are stored in the associated data/figures folder.
 
 ## Authors:
