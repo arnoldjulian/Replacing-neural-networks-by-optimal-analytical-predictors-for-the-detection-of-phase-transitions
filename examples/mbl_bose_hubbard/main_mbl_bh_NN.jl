@@ -40,7 +40,7 @@ prob = vcat(readdlm(data_folder*"probs_W="*string(1)*".txt")...)
 probss = [prob]
 for index in 2:201-1
   probb = vcat(readdlm(data_folder*"probs_W="*string(index)*".txt")...)
-  push!(probss,probb)
+  push!(probss, probb)
 end
 samples = collect(1:length(probss[1]))
 n_samples = length(samples)
@@ -48,11 +48,11 @@ n_samples = length(samples)
 # construct probability distribution from data
 # distr(x,p) gives probability to draw the sample x at parameter value p
 # samples correspond to enumeration of unique basis states with integers
-function distribution(sample,p,p_range,probss)
+function distribution(sample, p, p_range, probss)
   p_indx = Int(round((p-p_range[1])/(p_range[2]-p_range[1])))+1
   return probss[p_indx][Int(sample)]
 end
-distr = (x,p)->distribution(x,p,p_range,probss)
+distr = (x,p)->distribution(x, p, p_range, probss)
 
 # optionally run methods using the analytical expressions to compare with neural network results
 
@@ -69,21 +69,21 @@ pred_opt_PBM, indicator_opt_PBM, loss_opt_PBM = MLP.get_indicators_PBM_analytica
 indicator_opt_LBC, loss_opt_LBC = MLP.get_indicators_LBC_analytical(samples, distr, p_range, p_range_LBC)
 
 # construct dataset for training neural networks
-dataset = MLP.get_dataset(p_range,distr,samples)
-dataset_train_SL = MLP.get_training_data_SL(dataset,p_range,p_max,p_min)
+dataset = MLP.get_dataset(p_range, distr, samples)
+dataset_train_SL = MLP.get_training_data_SL(dataset, p_range, p_max, p_min)
 
 # standardize inputs
-inputs_one_hot = transpose(readdlm(folder_data*"strings.txt",eltype(dp)))
-mean_train,std_train = MLP.get_dataset_stats(dataset,inputs_one_hot,length(p_range))
+inputs_one_hot = transpose(readdlm(folder_data*"strings.txt", eltype(dp)))
+mean_train, std_train = MLP.get_dataset_stats(dataset, inputs_one_hot, length(p_range))
 inputs_one_hot_stand = (inputs_one_hot.-mean_train)./std_train
-mean_train_SL,std_train_SL = MLP.get_dataset_stats(dataset_train_SL,inputs_one_hot,length(p_range))
+mean_train_SL, std_train_SL = MLP.get_dataset_stats(dataset_train_SL, inputs_one_hot, length(p_range))
 inputs_one_hot_stand_SL = (inputs_one_hot.-mean_train_SL)./std_train_SL
 
 
 # supervised learning using neural networks
 
 # initialize neural network
-n_nodes_SL = [size(inputs_one_hot)[1],128,128,64,64,64,2]
+n_nodes_SL = [size(inputs_one_hot)[1], 128, 128, 64, 64, 64, 2]
 NN_SL = Chain(
   Dense(n_nodes_SL[1], n_nodes_SL[2], relu),
   Dense(n_nodes_SL[2], n_nodes_SL[3], relu),
@@ -102,7 +102,7 @@ verbose = true
 
 # train neural network
 # returns predictions, indicators, and loss saved at epochs specified by saveat_SL variable
-pred_logger_SL, losses_SL, NN_logger_SL = MLP.get_indicators_SL_numerical(pnn_SL, re_SL,dataset_train_SL,dataset,epochs_SL,p_range,dp,p_min,p_max,opt_SL,inputs_one_hot_stand,verbose=verbose,saveat=saveat_SL)
+pred_logger_SL, losses_SL, NN_logger_SL = MLP.get_indicators_SL_numerical(pnn_SL,  re_SL, dataset_train_SL, dataset, epochs_SL, p_range, dp, p_min, p_max, opt_SL, inputs_one_hot_stand, verbose=verbose, saveat=saveat_SL)
 
 # extract results at last save point
 pred_NN_SL = pred_logger_SL[end][1]
@@ -154,22 +154,22 @@ open(save_folder*"losses_SL.txt", "w") do io
 end
 
 # plot and save results of supervised learning in save_folder
-plt = plot(p_range,pred_NN_SL,dpi=300,c="black",label="NN",ylims=(0.0,1.0))
-plot!(p_range,pred_opt_SL,dpi=300,c="blue",label="analytical",ylims=(0.0,1.0))
-vline!([p_crit],label=L"p_{c}",c="red")
+plt = plot(p_range, pred_NN_SL, dpi=300, c="black", label="NN", ylims=(0.0,1.0))
+plot!(p_range ,pred_opt_SL, dpi=300, c="blue", label="analytical", ylims=(0.0,1.0))
+vline!([p_crit], label=L"p_{c}", c="red")
 xlabel!(L"$p$")
 ylabel!(L"$\hat{y}_{\mathrm{SL}}$")
 savefig(save_folder*"pred_NN_SL.png")
 
-plt = plot(p_range[2:end-1],indicator_NN_SL,dpi=300,c="black",label="NN")
-plot!(p_range[2:end-1],indicator_opt_SL,dpi=300,c="blue",label="analytical")
-vline!([p_crit],label=L"p_{c}",c="red")
+plt = plot(p_range[2:end-1], indicator_NN_SL, dpi=300, c="black", label="NN")
+plot!(p_range[2:end-1], indicator_opt_SL, dpi=300, c="blue", label="analytical")
+vline!([p_crit], label=L"p_{c}", c="red")
 xlabel!(L"$p$")
 ylabel!(L"$I_{\mathrm{SL}}$")
 savefig(save_folder*"indicator_NN_SL.png")
 
-plt = plot(collect(1:length(losses_SL)),losses_SL,dpi=300,c="black",label="NN")
-hline!([loss_opt_SL],label="analytical",c="blue")
+plt = plot(collect(1:length(losses_SL)), losses_SL, dpi=300, c="black", label="NN")
+hline!([loss_opt_SL], label="analytical", c="blue")
 xlabel!("Epochs")
 ylabel!(L"$\mathcal{L}_{\mathrm{SL}}$")
 savefig(save_folder*"loss_NN_SL.png")
@@ -178,7 +178,7 @@ savefig(save_folder*"loss_NN_SL.png")
 # prediction-based method using neural networks
 
 # initialize neural network
-n_nodes_PBM = [size(inputs_one_hot)[1],128,128,64,64,64,1]
+n_nodes_PBM = [size(inputs_one_hot)[1], 128, 128, 64, 64, 64, 1]
 NN_PBM = Chain(
   Dense(n_nodes_PBM[1], n_nodes_PBM[2], relu),
   Dense(n_nodes_PBM[2], n_nodes_PBM[3], relu),
@@ -197,7 +197,7 @@ verbose = true
 
 # train neural network
 # returns predictions, indicators, and loss saved at epochs specified by saveat_PBM variable
-pred_logger_PBM, losses_PBM, NN_logger_PBM = MLP.get_indicators_PBM_numerical(pnn_PBM,re_PBM,dataset,epochs_PBM,p_range,dp,opt_PBM,inputs_one_hot_stand,verbose=verbose,saveat=saveat_PBM)
+pred_logger_PBM, losses_PBM, NN_logger_PBM = MLP.get_indicators_PBM_numerical(pnn_PBM, re_PBM, dataset, epochs_PBM, p_range, dp, opt_PBM, inputs_one_hot_stand, verbose=verbose, saveat=saveat_PBM)
 
 # extract results at last save point
 pred_NN_PBM = pred_logger_PBM[end][1]
@@ -249,22 +249,22 @@ open(save_folder*"losses_PBM.txt", "w") do io
 end
 
 # plot and save results of prediction-based method in save_folder
-plt = plot(p_range,pred_NN_PBM,dpi=300,c="black",label="NN",ylims=(p_range[1],p_range[end]))
-plot!(p_range,pred_opt_PBM,dpi=300,c="blue",label="analytical",ylims=(p_range[1],p_range[end]))
-vline!([p_crit],label=L"p_{c}",c="red")
+plt = plot(p_range, pred_NN_PBM, dpi=300, c="black", label="NN", ylims=(p_range[1], p_range[end]))
+plot!(p_range, pred_opt_PBM, dpi=300, c="blue", label="analytical", ylims=(p_range[1], p_range[end]))
+vline!([p_crit], label=L"p_{c}", c="red")
 xlabel!(L"$p$")
 ylabel!(L"$\hat{y}_{\mathrm{PBM}}$")
 savefig(save_folder*"pred_NN_PBM.png")
 
-plt = plot(p_range[2:end-1],indicator_NN_PBM,dpi=300,c="black",label="NN")
-plot!(p_range[2:end-1],indicator_opt_PBM,dpi=300,c="blue",label="analytical")
-vline!([p_crit],label=L"p_{c}",c="red")
+plt = plot(p_range[2:end-1], indicator_NN_PBM, dpi=300, c="black", label="NN")
+plot!(p_range[2:end-1], indicator_opt_PBM, dpi=300, c="blue", label="analytical")
+vline!([p_crit], label=L"p_{c}", c="red")
 xlabel!(L"$p$")
 ylabel!(L"$I^{\mathrm{NN}}_{\mathrm{PBM}}$")
 savefig(save_folder*"indicator_NN_PBM.png")
 
-plt = plot(collect(1:length(losses_PBM)),losses_PBM,dpi=300,c="black",label="NN")
-hline!([loss_opt_PBM],label="analytical",c="blue")
+plt = plot(collect(1:length(losses_PBM)), losses_PBM, dpi=300, c="black", label="NN")
+hline!([loss_opt_PBM], label="analytical", c="blue")
 xlabel!("Epochs")
 ylabel!(L"$\mathcal{L}_{\mathrm{PBM}}$")
 savefig(save_folder*"loss_NN_PBM.png")
@@ -273,7 +273,7 @@ savefig(save_folder*"loss_NN_PBM.png")
 # learning by confusion using neural networks
 
 # initialize neural network
-n_nodes_LBC = [size(inputs_one_hot)[1],128,128,64,64,64,2]
+n_nodes_LBC = [size(inputs_one_hot)[1], 128, 128, 64, 64, 64, 2]
 NN_LBC = Chain(
   Dense(n_nodes_LBC[1], n_nodes_LBC[2], relu),
   Dense(n_nodes_LBC[2], n_nodes_LBC[3], relu),
@@ -293,12 +293,12 @@ verbose = true
 indicator_NN_LBC = []
 loss_NN_LBC = []
 for indx in collect(1:length(p_range_LBC))
-  pred_logger_LBC, losses_LBC, NN_logger_LBC = MLP.get_indicators_LBC_numerical_fixed_p(deepcopy(pnn_LBC),re_LBC,dataset,epochs_LBC,p_range,dp,opt_LBC,p_range_LBC,indx,inputs_one_hot_stand,saveat=saveat_LBC,verbose=verbose)
+  pred_logger_LBC, losses_LBC, NN_logger_LBC = MLP.get_indicators_LBC_numerical_fixed_p(deepcopy(pnn_LBC), re_LBC, dataset, epochs_LBC, p_range, dp, opt_LBC, p_range_LBC, indx, inputs_one_hot_stand, saveat=saveat_LBC, verbose=verbose)
 
   indicator_NN_LBC_p = pred_logger_LBC[end][1][1]
-  push!(indicator_NN_LBC,indicator_NN_LBC_p)
+  push!(indicator_NN_LBC, indicator_NN_LBC_p)
   loss_NN_LBC_p = pred_logger_LBC[end][2][1]
-  push!(loss_NN_LBC,loss_NN_LBC_p)
+  push!(loss_NN_LBC, loss_NN_LBC_p)
 end
 
 # save results of learning by confusion in save_folder
@@ -319,16 +319,16 @@ open(save_folder*"NN_structure_LBC.txt", "w") do io
 end
 
 # plot and save results of learning by confusion in save_folder
-plt = plot(p_range_LBC,indicator_NN_LBC,dpi=300,c="black",label="NN")
-plot!(p_range_LBC,indicator_opt_LBC,dpi=300,c="blue",label="analytical")
-vline!([p_crit],label=L"p_{c}",c="red")
+plt = plot(p_range_LBC, indicator_NN_LBC, dpi=300, c="black", label="NN")
+plot!(p_range_LBC, indicator_opt_LBC, dpi=300, c="blue", label="analytical")
+vline!([p_crit], label=L"p_{c}", c="red")
 xlabel!(L"$p$")
 ylabel!(L"$I_{\mathrm{LBC}}$")
 savefig(save_folder*"indicator_NN_LBC.png")
 
-plt = plot(p_range_LBC,loss_NN_LBC,dpi=300,c="black",label="NN")
-plot!(p_range_LBC,loss_opt_LBC,dpi=300,c="blue",label="analytical")
-vline!([p_crit],label=L"p_{c}",c="red")
+plt = plot(p_range_LBC, loss_NN_LBC, dpi=300, c="black", label="NN")
+plot!(p_range_LBC, loss_opt_LBC, dpi=300, c="blue", label="analytical")
+vline!([p_crit], label=L"p_{c}", c="red")
 xlabel!(L"$p$")
 ylabel!(L"$\mathcal{L}_{\mathrm{LBC}}$")
 savefig(save_folder*"loss_NN_LBC.png")

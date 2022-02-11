@@ -24,7 +24,7 @@ p_range = collect(p_min:dp:p_max)
 p_range_LBC = collect(p_min-dp/2:dp:p_max+dp/2)
 
 # construct probability distribution
-distr,samples = MLP.tilt_distr(p_range;p_crit=p_crit)
+distr,samples = MLP.tilt_distr(p_range; p_crit=p_crit)
 
 # supervised learning using analytical expression
 # returns optimal predictions, indicator, and loss
@@ -84,32 +84,32 @@ open(save_folder*"loss_opt_LBC.txt", "w") do io
 end
 
 # plot and save results in save_folder
-plt = plot(p_range,pred_opt_SL,dpi=300,c="black",label=false)
+plt = plot(p_range, pred_opt_SL, dpi=300, c="black", label=false)
 xlabel!(L"$p$")
 ylabel!(L"$\hat{y}^{\mathrm{opt}}_{\mathrm{SL}}$")
 savefig(save_folder*"pred_opt_SL.png")
 
-plt = plot(p_range[2:end-1],indicator_opt_SL,dpi=300,c="black",label=false)
+plt = plot(p_range[2:end-1], indicator_opt_SL, dpi=300, c="black", label=false)
 xlabel!(L"$p$")
 ylabel!(L"$I^{\mathrm{opt}}_{\mathrm{SL}}$")
 savefig(save_folder*"indicator_opt_SL.png")
 
-plt = plot(p_range,pred_opt_PBM,dpi=300,c="black",label=false)
+plt = plot(p_range, pred_opt_PBM, dpi=300, c="black", label=false)
 xlabel!(L"$p$")
 ylabel!(L"$\hat{y}^{\mathrm{opt}}_{\mathrm{PBM}}$")
 savefig(save_folder*"pred_opt_PBM.png")
 
-plt = plot(p_range[2:end-1],indicator_opt_PBM,dpi=300,c="black",label=false)
+plt = plot(p_range[2:end-1], indicator_opt_PBM, dpi=300, c="black", label=false)
 xlabel!(L"$p$")
 ylabel!(L"$I^{\mathrm{opt}}_{\mathrm{PBM}}$")
 savefig(save_folder*"indicator_opt_PBM.png")
 
-plt = plot(p_range_LBC,indicator_opt_LBC,dpi=300,c="black",label=false)
+plt = plot(p_range_LBC, indicator_opt_LBC, dpi=300, c="black", label=false)
 xlabel!(L"$p$")
 ylabel!(L"$I^{\mathrm{opt}}_{\mathrm{LBC}}$")
 savefig(save_folder*"indicator_opt_LBC.png")
 
-plt = plot(p_range_LBC,loss_opt_LBC,dpi=300,c="black",label=false)
+plt = plot(p_range_LBC, loss_opt_LBC, dpi=300, c="black", label=false)
 xlabel!(L"$p$")
 ylabel!(L"$\mathcal{L}^{\mathrm{opt}}_{\mathrm{LBC}}$")
 savefig(save_folder*"loss_opt_LBC.png")
