@@ -105,6 +105,7 @@ function get_indicators_SL_analytical(samples, distribution, p_range, dp, p_min,
     cres3 += caches[i].cres[3]
   end
 
+  # compute indicator using symmetric difference quotient
   return pred_SL_opt, (-1*(circshift(pred_SL_opt, -1).-circshift(pred_SL_opt, 1))./(2*dp))[2:end-1], cres2/cres3
 end
 
@@ -163,6 +164,8 @@ function train_SL_weighted(NN, pnn, data_train, data_test, epochs, p_range, dp, 
   indices = collect(1:size(data_train)[2])
   for epoch in 1:epochs
     Random.shuffle!(indices)
+
+    # compute loss and gradient batchwise
     grad = zeros(eltype(p_range[1]), length(pnn))
     for batch in 1:n_batches_train
       randint = get_batches(indices, batchsize, batch)
@@ -171,9 +174,12 @@ function train_SL_weighted(NN, pnn, data_train, data_test, epochs, p_range, dp, 
       grad .+= back(one(val))[1]
       losses[epoch] += val
     end
+
+    # update NN parameters based on overall gradient
     Flux.Optimise.update!(opt, pnn, grad./len_p_train)
     losses[epoch] =losses[epoch]/len_p_train
 
+    # keep track of best performing NN
     if epoch == 1
       best_loss = losses[epoch]
     elseif losses[epoch] < best_loss
@@ -184,6 +190,7 @@ function train_SL_weighted(NN, pnn, data_train, data_test, epochs, p_range, dp, 
       best_loss = losses[epoch]
     end
 
+    # save at regular intervals
     if epoch % saveat == 0
       push!(NN_logger, pnn_best)
       push!(pred_logger, predict_SL(data_train, data_test, p_range, p_min, p_max, dp, NN, pnn_best, batchsize, n_batches_train, n_batches_test, len_p_train, inputs, calc_loss=true))
@@ -205,16 +212,21 @@ function train_SL_stochastic(NN, pnn, data_train, data_test, epochs, p_range, dp
 
   losses = zeros(eltype(p_range[1]), epochs)
   for epoch in 1:epochs
+    
+    # compute loss and gradient batchwise
     for batch in 1:n_batches_train_stochastic
       randint = sample(1:length(data_train[1, :]), Weights(data_train[2, :]), batchsize_stochastic)
       data = reshape(data_train[:, randint], 3, length(randint))
       val, back = Flux.Zygote.pullback(p -> main_loss_SL_stochastic(NN, p, data, p_range, p_min, p_max, inputs), pnn)
       grad = back(one(val))[1]
+
+      # update NN parameters based on batch gradient
       Flux.Optimise.update!(opt, pnn, grad)
       losses[epoch] += val
     end
     losses[epoch] =losses[epoch]/n_batches_train_stochastic
 
+    # keep track of best performing NN
     if epoch == 1
       best_loss = losses[epoch]
     elseif losses[epoch] < best_loss
@@ -225,6 +237,7 @@ function train_SL_stochastic(NN, pnn, data_train, data_test, epochs, p_range, dp
       best_loss = losses[epoch]
     end
 
+    # save at regular intervals
     if epoch % saveat == 0
       push!(NN_logger, pnn_best)
       push!(pred_logger, predict_SL(data_train, data_test, p_range, p_min, p_max, dp, NN, pnn_best, batchsize, n_batches_train, n_batches_test, len_p_train, inputs, calc_loss=true))
@@ -239,6 +252,7 @@ end
 # compute predictions, indicators, and loss value based on current NN
 function predict_SL(data_train, data_test, p_range, p_min, p_max, dp, NN, pnn, batchsize, n_batches_train, n_batches_test, len_p_train, inputs; calc_loss=false, loss=zero(eltype(p_range[1])))
 
+  # compute predictions batch-wise
   predictions = zeros(eltype(p_range[1]), length(p_range))
   indices = collect(1:size(data_test)[2])
   for batch in 1:n_batches_test
@@ -255,6 +269,7 @@ function predict_SL(data_train, data_test, p_range, p_min, p_max, dp, NN, pnn, b
     end
   end
 
+  # compute loss batch-wise
   if calc_loss
     indices = collect(1:size(data_train)[2])
     for batch in 1:n_batches_train
@@ -265,11 +280,12 @@ function predict_SL(data_train, data_test, p_range, p_min, p_max, dp, NN, pnn, b
     loss = loss/len_p_train
   end
 
+  # compute indicator using symmetric difference quotient
   return predictions, -1*((circshift(predictions, -1).-circshift(predictions, 1))./(2*dp))[2:end-1], [loss]
 end
 
 # perform SL using neural networks
-function get_indicators_SL_numerical(pnn, NN, data_train, data_test, epochs, p_range, dp, p_min, p_max, opt, inputs; verbose=false, trained=false, saveat=epochs, batchsize=length(data_train[1, :]), stochastic=false,  n_batches_train_stochastic=1, batchsize_stochastic=length(data_train[1, :]), train_opt=false)
+function get_indicators_SL_numerical(pnn, NN, data_train, data_test, epochs, p_range, dp, p_min, p_max, opt, inputs; verbose=false, trained=false, saveat=epochs, batchsize=length(data_train[1, :]), stochastic=false,  n_batches_train_stochastic=1, batchsize_stochastic=length(data_train[1, :]))
 
   n_batches_train = ceil(eltype(batchsize), size(data_train)[2]/batchsize)
   n_batches_test = ceil(eltype(batchsize), size(data_test)[2]/batchsize)
@@ -278,8 +294,6 @@ function get_indicators_SL_numerical(pnn, NN, data_train, data_test, epochs, p_r
   if !trained
     if stochastic
       losses, NN_logger, pred_logger = train_SL_stochastic(NN, pnn, data_train, data_test, epochs, p_range, dp, p_min, p_max, opt, batchsize, batchsize_stochastic, n_batches_train, n_batches_train_stochastic, n_batches_test, len_p_train, inputs, verbose=verbose, saveat=saveat)
-    elseif train_opt
-      losses, NN_logger, pred_logger = train_SL_opt(NN, pnn, data_train, data_test,epochs, p_range, dp, p_min, p_max, opt, batchsize,  batchsize_stochastic, n_batches_train, n_batches_train_stochastic, n_batches_test, len_p_train, inputs, verbose=verbose, saveat=saveat)
     else
       losses, NN_logger, pred_logger = train_SL_weighted(NN, pnn, data_train, data_test, epochs, p_range, dp, p_min, p_max, opt, batchsize, n_batches_train, n_batches_test, len_p_train, inputs, verbose=verbose, saveat=saveat)
     end

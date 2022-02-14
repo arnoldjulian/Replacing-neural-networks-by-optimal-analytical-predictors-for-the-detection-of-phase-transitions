@@ -67,6 +67,7 @@ function get_indicators_PBM_analytical(samples, distribution, p_range, dp)
     cres2 += caches[i].cres[2]
   end
 
+  # compute indicator using symmetric difference quotient
   return pred_PBM_opt, map(x -> x-1,(circshift(pred_PBM_opt, -1).-circshift(pred_PBM_opt, 1))./(2*dp))[2:end-1], cres2/length(p_range)
 end
 
@@ -108,6 +109,8 @@ function train_PBM_weighted(NN, pnn, dataset, epochs, p_range, dp, opt, batchsiz
   indices = collect(1:size(dataset)[2])
   for epoch in 1:epochs
     Random.shuffle!(indices)
+
+    # compute gradient batch-wise
     grad = zeros(eltype(p_range[1]), length(pnn))
     for batch in 1:n_batches
       randint = get_batches(indices, batchsize, batch)
@@ -116,9 +119,12 @@ function train_PBM_weighted(NN, pnn, dataset, epochs, p_range, dp, opt, batchsiz
       grad .+= back(one(val))[1]
       losses[epoch] += val
     end
+
+    # update NN parameters based on overall gradient
     Flux.Optimise.update!(opt, pnn, grad./length(p_range))
     losses[epoch] =losses[epoch]/length(p_range)
 
+    # keep track of best performing NN
     if epoch == 1
       best_loss = losses[epoch]
     elseif losses[epoch] < best_loss
@@ -129,6 +135,7 @@ function train_PBM_weighted(NN, pnn, dataset, epochs, p_range, dp, opt, batchsiz
       best_loss = losses[epoch]
     end
 
+    # save at regular intervals
     if epoch % saveat == 0
       push!(NN_logger, pnn_best)
       push!(pred_logger, predict_PBM(dataset, p_range, pnn_best, dp, NN, batchsize, n_batches, inputs, calc_loss=true))
@@ -150,16 +157,21 @@ function train_PBM_stochastic(NN,pnn, dataset, epochs, p_range, dp, opt, batchsi
 
   losses = zeros(eltype(p_range[1]), epochs)
   for epoch in 1:epochs
+
+    # compute loss and gradient batchwise
     for batch in 1:n_batches_train_stochastic
       randint = sample(1:length(dataset[1, :]), Weights(dataset[2, :]), batchsize_stochastic)
       data = reshape(dataset[:, randint], 3, length(randint))
       val, back = Flux.Zygote.pullback(p -> main_loss_PBM_stochastic(NN, p, data, p_range, inputs), pnn)
       grad = back(one(val))[1]
+
+      # update NN parameters based on batch gradient
       Flux.Optimise.update!(opt, pnn, grad)
       losses[epoch] += val
     end
     losses[epoch] =losses[epoch]/n_batches_train_stochastic
 
+    # keep track of best performing NN
     if epoch == 1
       best_loss = losses[epoch]
     elseif losses[epoch] < best_loss
@@ -170,7 +182,7 @@ function train_PBM_stochastic(NN,pnn, dataset, epochs, p_range, dp, opt, batchsi
       best_loss = losses[epoch]
     end
 
-
+    # save at regular intervals
     if epoch % saveat == 0
       push!(NN_logger, pnn_best)
       push!(pred_logger, predict_PBM(dataset, p_range, pnn_best, dp, NN, batchsize, n_batches, inputs, calc_loss=true))
@@ -185,6 +197,7 @@ end
 # compute predictions, indicators, and loss value based on current NN
 function predict_PBM(dataset, p_range, pnn, dp, NN, batchsize, n_batches, inputs; calc_loss=false, loss=zero(eltype(p_range[1])))
 
+  # compute predictions and loss batch-wise
   predictions = zeros(eltype(p_range[1]), length(p_range))
   indices = collect(1:size(dataset)[2])
   for batch in 1:n_batches
@@ -208,6 +221,7 @@ function predict_PBM(dataset, p_range, pnn, dp, NN, batchsize, n_batches, inputs
     loss = loss/length(p_range)
   end
 
+  # compute indicator using symmetric difference quotient
   return predictions,map(x -> x-1,(circshift(predictions, -1).-circshift(predictions, 1))./(2*dp))[2:end-1], [loss]
 end
 

@@ -150,6 +150,8 @@ function train_LBC_weighted(NN, pnn, dataset, epochs, p_range, opt, p_tar, batch
   for epoch in 1:epochs
     Random.shuffle!(indices)
     grad = zeros(eltype(p_range[1]), length(pnn))
+
+    # compute loss and gradient batchwise
     for batch in 1:n_batches
       randint = get_batches(indices, batchsize, batch)
       data = reshape(dataset[:, randint], 3, length(randint))
@@ -157,9 +159,12 @@ function train_LBC_weighted(NN, pnn, dataset, epochs, p_range, opt, p_tar, batch
       grad .+= back(one(val))[1]
       losses[epoch] += val
     end
+
+    # update NN parameters based on overall gradient
     Flux.Optimise.update!(opt, pnn, grad./length(p_range))
     losses[epoch] = losses[epoch]/length(p_range)
 
+    # keep track of best performing NN
     if epoch == 1
       best_loss = losses[epoch]
     elseif losses[epoch] < best_loss
@@ -170,6 +175,7 @@ function train_LBC_weighted(NN, pnn, dataset, epochs, p_range, opt, p_tar, batch
       best_loss = losses[epoch]
     end
 
+    # save at regular intervals
     if epoch % saveat == 0
       push!(NN_logger, pnn_best)
       push!(pred_logger, predict_LBC(dataset, p_range, pnn_best, NN, batchsize, n_batches, p_tar, inputs, calc_loss=true))
@@ -191,16 +197,21 @@ function train_LBC_stochastic(NN, pnn, dataset, epochs, p_range, opt, p_tar, bat
 
   losses = zeros(eltype(p_range[1]), epochs)
   for epoch in 1:epochs
+
+    # compute loss and gradient batchwise
     for batch in 1:n_batches_stochastic
       randint = sample(1:length(dataset[1, :]), Weights(dataset[2, :]), batchsize)
       data = reshape(dataset[:, randint], 3, length(randint))
       val, back = Flux.Zygote.pullback(p -> main_loss_LBC_stochastic(NN, p, data, p_tar, p_range, inputs), pnn)
       grad = back(one(val))[1]
+
+      # update NN parameters based on batch gradient
       Flux.Optimise.update!(opt, pnn, grad)
       losses[epoch] += val
     end
     losses[epoch] = losses[epoch]/n_batches_stochastic
 
+    # keep track of best performing NN
     if epoch == 1
       best_loss = losses[epoch]
     elseif losses[epoch] < best_loss
@@ -211,6 +222,7 @@ function train_LBC_stochastic(NN, pnn, dataset, epochs, p_range, opt, p_tar, bat
       best_loss = losses[epoch]
     end
 
+    # save at regular intervals
     if epoch % saveat == 0
       push!(NN_logger, pnn_best)
       push!(pred_logger, predict_LBC(dataset, p_range, pnn_best, NN, batchsize, n_batches, p_tar, inputs,calc_loss=true))
@@ -226,6 +238,7 @@ end
 function predict_LBC(dataset, p_range, pnn, NN, batchsize, n_batches, p_tar, inputs; calc_loss=false, loss=zero(eltype(p_range[1])))
   error = zero(eltype(p_range[1]))
 
+    # compute indicator and loss batch-wise
   indices = collect(1:size(dataset)[2])
   for batch in 1:n_batches
     randint = get_batches(indices, batchsize, batch)
