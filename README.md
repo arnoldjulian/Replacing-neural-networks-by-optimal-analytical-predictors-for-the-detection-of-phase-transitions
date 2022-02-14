@@ -9,7 +9,7 @@ Identifying phase transitions and classifying phases of matter is central to und
 
 ### This repository
 
-contains code to identify phase transitions from data using supervised learning, learning by confusion, or the prediction-based method, using the optimal analytical expressions (`main_xxx_opt.jl`) or neural networks (`main_xxx_NN.jl`). The source files can be found in [source folder](./src/). We provide exemplary code for
+contains code to identify phase transitions from data using supervised learning, learning by confusion, or the prediction-based method, using the optimal analytical expressions (`main_**_opt.jl`) or neural networks (`main_**_NN.jl`). The source files can be found in [source folder](./src/). We provide exemplary code for
 
 * the prototypical probability distributions discussed in our paper, see [the folder](./examples/prototypical_distr/),
 
