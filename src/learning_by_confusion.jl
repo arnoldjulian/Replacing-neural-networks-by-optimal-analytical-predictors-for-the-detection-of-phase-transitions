@@ -101,7 +101,7 @@ end
 
 # computation using neural networks
 
-
+# loss function where each prediction is weighted by probability associated with input
 function main_loss_LBC_weighted(NN, pnn, dataset, p_tar, p_range, inputs)
   indices = convert.(Int, dataset[1,:])
   input = inputs[:, indices]
@@ -119,6 +119,7 @@ function main_loss_LBC_weighted(NN, pnn, dataset, p_tar, p_range, inputs)
   return loss
 end
 
+# loss function without weighting
 function main_loss_LBC_stochastic(NN, pnn, dataset, p_tar, p_range, inputs)
   indices = convert.(Int, dataset[1, :])
   input = inputs[:, indices]
@@ -136,6 +137,7 @@ function main_loss_LBC_stochastic(NN, pnn, dataset, p_tar, p_range, inputs)
   return loss/length(dataset[1, :])
 end
 
+# train NN in LBC based on weighted loss function
 function train_LBC_weighted(NN, pnn, dataset, epochs, p_range, opt, p_tar, batchsize, n_batches, inputs; verbose=false, saveat=epochs)
   NN_logger = [zeros(eltype(p_range[1]), length(pnn))]
   pred_logger = [(zeros(eltype(p_range[1]), 1), zeros(eltype(p_range[1]), 1))]
@@ -179,6 +181,7 @@ function train_LBC_weighted(NN, pnn, dataset, epochs, p_range, opt, p_tar, batch
   return losses, NN_logger, pred_logger
 end
 
+# train NN in LBC based on ``stochastic'' loss function
 function train_LBC_stochastic(NN, pnn, dataset, epochs, p_range, opt, p_tar, batchsize, n_batches_stochastic, n_batches, inputs; verbose=false, saveat=epochs)
   NN_logger = [zeros(eltype(p_range[1]), length(pnn))]
   pred_logger = [(zeros(eltype(p_range[1]), 1), zeros(eltype(p_range[1]), 1))]
@@ -219,6 +222,7 @@ function train_LBC_stochastic(NN, pnn, dataset, epochs, p_range, opt, p_tar, bat
   return losses, NN_logger, pred_logger
 end
 
+# compute indicator and loss value based on current NN
 function predict_LBC(dataset, p_range, pnn, NN, batchsize, n_batches, p_tar, inputs; calc_loss=false, loss=zero(eltype(p_range[1])))
   error = zero(eltype(p_range[1]))
 
@@ -262,6 +266,7 @@ function predict_LBC(dataset, p_range, pnn, NN, batchsize, n_batches, p_tar, inp
   return [1-error/length(p_range)], [loss]
 end
 
+# perform LBC for fixed bipartition point using neural networks
 function get_indicators_LBC_numerical_fixed_p(pnn, NN, dataset, epochs, p_range, dp, opt, p_range_LBC, indx_ptar, inputs; verbose=false, trained=false, saveat=epochs, batchsize=length(dataset[1, :]), stochastic=false, n_batches_train_stochastic=10, batchsize_stochastic=length(dataset[1, :]), train_opt=false)
 
   n_batches = ceil(eltype(batchsize), size(dataset)[2]/batchsize)
