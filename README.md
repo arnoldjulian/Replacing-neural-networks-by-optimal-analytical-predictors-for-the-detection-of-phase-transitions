@@ -24,7 +24,7 @@ The data used to construct the corresponding probability distributions can be fo
 - install [julia](https://julialang.org/downloads/)
 - download, `activate`, and `instantiate` [`Pkg.instantiate()`] our package
 - individual files can then be executed by calling, e.g., `julia main_ising_opt.jl`
-- output data/figures are stored in the associated save folder.
+- output data/figures are stored in the associated results folder.
 
 ## Authors:
 
