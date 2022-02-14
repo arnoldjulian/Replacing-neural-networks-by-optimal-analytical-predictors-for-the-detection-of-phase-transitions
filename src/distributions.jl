@@ -1,3 +1,13 @@
+# construct constant distribution (case 1)
+function constant_distr()
+  function uniform(x, p)
+    return 0.5f0
+  end
+  samples = [0, 1]
+  return uniform, samples
+end
+
+# construct distribution with jump at p_crit (case 2)
 function jump_distr(;p_crit=1.0f0)
   function stepfunc(x, p, p_crit)
     if p <= p_crit
@@ -18,26 +28,7 @@ function jump_distr(;p_crit=1.0f0)
   return (x, p) -> stepfunc(x, p, p_crit), samples
 end
 
-function constant_distr()
-  function uniform(x, p)
-    return 0.5f0
-  end
-  samples = [0, 1]
-  return uniform, samples
-end
-
-function continuous_distr()
-  function paramagnet_distr(x, p)
-    if x == 0
-      return 1.0-0.5*(tanh(p)+1)
-    else
-      return 0.5*(tanh(p)+1)
-    end
-  end
-  samples = [0, 1]
-  return paramagnet_distr, samples
-end
-
+# construct ``tilted'' distribution with jump at p_crit (case 3)
 function tilt_distr(p_range; p_crit = 2.0f0)
   function tilt(p, p_crit)
     a_left = -1.0f0
@@ -65,6 +56,7 @@ function tilt_distr(p_range; p_crit = 2.0f0)
   return (x, p) -> tilt_distr(x, p, p_range), samples
 end
 
+# boltzmann factor
 function boltzmann_factor_energy(energy, T)
   if T == Inf
     return one(eltype(T))
@@ -93,6 +85,7 @@ function get_probabilities(p_range, energies)
   return probs
 end
 
+# construct thermal distribution
 function thermal_distr(x, p, probs, p_range)
   if p == Inf
     p_indx = length(p_range)
@@ -104,40 +97,21 @@ function thermal_distr(x, p, probs, p_range)
   return partition_func
 end
 
+# construct distribution of ising model based on exact enumeration of all configurations
 function ising_exact_distr(energies, p_range)
   probs = get_probabilities(p_range, energies)
   return (x, p) -> thermal_distr(x ,p, probs, p_range)
 end
 
+# probability for specific sample at fixed value of tuning parameter
 function distr_approx_x_p(full_data, p_range, x, p)
   p_indx = Int(round((p-p_range[1])/(p_range[2]-p_range[1])))+1
   return full_data[p_indx, x]
 end
 
+# construct distribution based on Monte Carlo samples
 function distr_approx(energies, unique_energies, numbers, p_range)
   full_data =zeros(eltype(p_range[1]),(length(p_range),length(unique_energies)))
-  for i in 1:length(p_range)
-    numtot = zero(eltype(p_range[1]))
-    for j in 1:length(unique_energies)
-      number_list = numbers[i]
-      energy_list = energies[i]
-      sample = unique_energies[j]
-      indices = findall(x -> x==sample, energy_list)
-      if length(indices) == 0
-        full_data[i, j] = zero(eltype(sample))
-      else
-        full_data[i, j] = number_list[indices[1]]
-        numtot += number_list[indices[1]]
-      end
-    end
-    full_data[i, :] = full_data[i, :]/numtot
-  end
-
-  return (x, p) -> distr_approx_x_p(full_data, p_range, x, p), collect(1:length(unique_energies))
-end
-
-function distr_approx_numerical(energies, unique_energies, numbers, p_range)
-  full_data =zeros(eltype(p_range[1]), (length(p_range), length(unique_energies)))
   for i in 1:length(p_range)
     numtot = zero(eltype(p_range[1]))
     for j in 1:length(unique_energies)

@@ -15,22 +15,6 @@ function prepare_dataset_tilted(p, distribution, n_samples, samples)
   return data
 end
 
-# function prepare_dataset(p,distribution,n_samples)
-#   random = rand(n_samples)
-#   prob = distribution(0,p)
-#   num = length(random[random .< prob])
-#   data = ((0,num),(1,n_samples-num))
-#   return data
-# end
-#
-# function get_datasets(p_range,distribution,n_samples)
-#   datasets = []
-#   for p in p_range
-#     push!(datasets, prepare_dataset(p,distribution,n_samples))
-#   end
-#   return datasets
-# end
-
 function get_datasets_tilted(p_range, distribution, n_samples, samples)
   datasets = []
   for p in p_range
@@ -114,39 +98,6 @@ function get_dataset_proto(p_range, distribution, samples)
   end
   return dataset
 end
-
-# function get_dataset_unlabelled(p_range,distribution,samples)
-#   data,counter = prepare_dataset(p_range[1],distribution,samples)
-#   datasets = [data]
-#   for indxp in 2:length(p_range)
-#     data,count = prepare_dataset(p_range[indxp],distribution,samples)
-#     push!(datasets, data)
-#     counter+=count
-#   end
-#   mean,std=get_stats(datasets)
-#   return datasets,mean,std,Int(counter)
-# end
-#
-# function get_dataset(p_range,distribution,samples)
-#   dataset_ul,mean,std,n_unique = get_dataset_unlabelled(p_range,distribution,samples)
-#
-#   dataset = zeros(eltype(p_range[1]),(3,n_unique))
-#   count=1
-#   len_p_train = 0
-#   for i in 1:length(dataset_ul)
-#     data = dataset_ul[i]
-#     p=p_range[i]
-#
-#     for j in 1:length(data)
-#       freq = data[j][2]
-#       if freq !=zero(eltype(freq))
-#         dataset[:,count] = [data[j][1],freq,i*one(eltype(freq))]
-#         count+=1
-#       end
-#     end
-#   end
-#   return dataset
-# end
 
 function get_training_data_SL(dataset_SL, p_range, p_max, p_min)
   train = [dataset_SL[:,1]]

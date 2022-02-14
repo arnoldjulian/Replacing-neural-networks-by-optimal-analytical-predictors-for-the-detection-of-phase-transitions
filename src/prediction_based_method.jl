@@ -1,3 +1,6 @@
+# computation using analytical expression
+
+# define cache
 struct PBM_cache{cnumtype, cdentype, cprobtype, cpredxtype, crestype}
   cnum::cnumtype
   cden::cdentype
@@ -6,7 +9,7 @@ struct PBM_cache{cnumtype, cdentype, cprobtype, cpredxtype, crestype}
   cres::crestype
 end
 
-# analytical
+# get optimal predictions for specific sample
 function get_pred_opt_x_PBM!(x, distribution, p_range,PBMc)
   @unpack cnum, cden, cprob, cpredx, cres = PBMc
 
@@ -20,14 +23,13 @@ function get_pred_opt_x_PBM!(x, distribution, p_range,PBMc)
   end
 
   if cden[1] == zero(eltype(cden[1]))
-    # println(x)
-    # error("This sample is not contained in the data...")
     return zero(eltype(cden[1]))
   else
     return cnum[1]/cden[1]
   end
 end
 
+# get mean optimal predictions for fixed value of tuning parameter
 function get_pred_opt_p_PBM!(samples, distribution, p_range, p_tar,PBMc)
   @unpack cnum, cden, cprob, cpredx, cres = PBMc
 
@@ -42,14 +44,8 @@ function get_pred_opt_p_PBM!(samples, distribution, p_range, p_tar,PBMc)
   return nothing
 end
 
+# compute optimal predictions and indicators, as well as optimal loss of PBM
 function get_indicators_PBM_analytical(samples, distribution, p_range, dp)
-
-  # cnum = [zero(eltype(dp))]
-  # cden = [zero(eltype(dp))]
-  # cprob = [zero(eltype(dp))]
-  # cpredx = [zero(eltype(dp))]
-  # cres = [zero(eltype(dp)), zero(eltype(dp))]
-  # PBMc = PBM_cache(cnum,cden,cprob,cpredx,cres)
 
   caches=[PBM_cache([zero(eltype(dp))], [zero(eltype(dp))], [zero(eltype(dp))],[zero(eltype(dp))], [zero(eltype(dp)), zero(eltype(dp))]) for i in 1:Threads.nthreads()]
   pred_PBM_opt = zeros(eltype(dp), length(p_range))
@@ -64,47 +60,12 @@ function get_indicators_PBM_analytical(samples, distribution, p_range, dp)
     cres2 += caches[i].cres[2]
   end
 
-  # pred_PBM_opt = zeros(eltype(dp),length(p_range))
-  # caches=[PBM_cache([zero(eltype(dp))],[zero(eltype(dp))],[zero(eltype(dp))],[zero(eltype(dp))],[zero(eltype(dp)), zero(eltype(dp))]) for i in 1:length(p_range)]
-  #
-  # @sync for indxp in collect(1:length(p_range))
-  #   Threads.@spawn get_pred_opt_p_PBM!(samples, distribution, p_range, p_range[indxp],caches[indxp])
-  # end
-  #
-  # cres2 = zero(eltype(dp))
-  # for indxp in collect(1:length(p_range))
-  #   pred_PBM_opt[indxp] = caches[indxp].cres[1]
-  #   cres2 += caches[indxp].cres[2]
-  # end
-
-
   return pred_PBM_opt, map(x -> x-1,(circshift(pred_PBM_opt, -1).-circshift(pred_PBM_opt, 1))./(2*dp))[2:end-1], cres2/length(p_range)
 end
 
-#old function for separate calculation of the loss
-function get_loss_opt_PBM(samples, distribution, p_range, loss_type)
-  loss = zero(eltype(p_range[1]))
-  for p in p_range
-    loss_p = zero(eltype(p_range[1]))
 
-    for x in samples
-      p_opt = get_pred_opt_x_PBM(x, distribution, p_range)
-      if loss_type == "MSE"
-        loss_p += distribution(x, p)*(p-p_opt)^2
-      else
-        error("The prediction-based method only supports MSE loss.")
-      end
-    end
-    loss += loss_p
-  end
+# computation using neural networks
 
-  return loss/length(p_range)
-end
-
-# numerical part
-
-# need to be able to save trained NNs and re-evaluate without retraining (also save parameters during training)
-# implement batchwise training
 
 function main_loss_PBM_weighted(NN, pnn, data, p_range, inputs)
   indices = convert.(Int, data[1, :])
@@ -300,8 +261,6 @@ function get_indicators_PBM_numerical(pnn, NN, dataset, epochs, p_range, dp, opt
     pred_logger = pred_logger[2:end]
     NN_logger = NN_logger[2:end]
 
-
-    # predictions, indicator = predict_PBM(dataset,p_range,trained_pnn,dp,NN,batchsize,n_batches)
   else
     predictions, indicator, loss = predict_PBM(dataset, p_range, pnn, dp, NN, batchsize, n_batches, inputs, calc_loss=true)
     losses = zeros(eltype(dp), epochs)

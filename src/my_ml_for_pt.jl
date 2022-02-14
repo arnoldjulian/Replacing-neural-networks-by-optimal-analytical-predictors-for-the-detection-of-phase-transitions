@@ -1,6 +1,7 @@
 __precompile__()
 module my_ml_for_pt
 
+# export package name as MLP
 export MLP
 const MLP = my_ml_for_pt
 
@@ -13,6 +14,7 @@ using DelimitedFiles
 using Random
 using Base.Threads
 
+# include additional files
 include("supervised_learning.jl")
 include("learning_by_confusion.jl")
 include("prediction_based_method.jl")

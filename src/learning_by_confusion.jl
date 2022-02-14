@@ -1,3 +1,6 @@
+# computation using analytical expression
+
+# define cache
 struct LBC_cache{cP1type, cP2type, cprobtype, cpredxtype, clabeltype, crestype}
   cP1::cP1type
   cP2::cP2type
@@ -7,7 +10,7 @@ struct LBC_cache{cP1type, cP2type, cprobtype, cpredxtype, clabeltype, crestype}
   cres::crestype
 end
 
-# analytical part
+# get optimal predictions for specific sample
 function get_pred_opt_x_LBC!(x, distribution, p_range, p_tar, LBCc)
   @unpack cP1, cP2, cprob, cpredx, clabel, cres = LBCc
 
@@ -23,13 +26,11 @@ function get_pred_opt_x_LBC!(x, distribution, p_range, p_tar, LBCc)
   end
 
   if cP1[1] + cP2[1] == zero(eltype(cP1[1]))
-    # println(x)
-    # println(cP1[1]+cP2[1])
-    # error("This sample is not contained in the data...")
     return zero(eltype(cP1[1]))
   else
+    # adjust depending on the choice of data labelling
+    # alternative: cP2[1]/(cP1[1]+cP2[1])
     return cP1[1]/(cP1[1]+cP2[1])
-    # return cP2[1]/(cP1[1]+cP2[1])
   end
 end
 
@@ -56,35 +57,8 @@ function get_e_opt_p_LBC!(samples, distribution, p_range, p_tar, LBCc)
   return nothing
 end
 
-
+# compute optimal indicator and loss of LBC across entire range of tuning parameter
 function get_indicators_LBC_analytical(samples, distribution, p_range, p_range_LBC)
-  # cP1 = [zero(eltype(p_range[1]))]
-  # cP2 = [zero(eltype(p_range[1]))]
-  # cprob = [zero(eltype(p_range[1]))]
-  # cpredx = [zero(eltype(p_range[1]))]
-  # clabel = [zero(eltype(p_range[1]))]
-  # cres = [zero(eltype(p_range[1])), zero(eltype(p_range[1]))]
-  # LBCc = LBC_cache(cP1,cP2,cprob,cpredx,clabel,cres)
-
-  # cache=LBC_cache([zero(eltype(p_range[1]))],[zero(eltype(p_range[1]))],[zero(eltype(p_range[1]))],[zero(eltype(p_range[1]))],[zero(eltype(p_range[1]))],[zero(eltype(p_range[1])), zero(eltype(p_range[1]))])
-  #
-  # acc_LBC_opt = zeros(eltype(p_range_LBC[1]), length(p_range_LBC))
-  # loss_LBC_opt = zeros(eltype(p_range_LBC[1]),length(p_range_LBC))
-  # for indxp in 1:length(p_range_LBC)
-  #   get_e_opt_p_LBC!(samples, distribution, p_range,p_range_LBC[indxp], cache)
-  #   acc_LBC_opt[indxp] = 1-cache.cres[1]/length(p_range)
-  #   loss_LBC_opt[indxp] = cache.cres[2]/length(p_range)
-  # end
-
-  # caches=[LBC_cache([zero(eltype(p_range[1]))],[zero(eltype(p_range[1]))],[zero(eltype(p_range[1]))],[zero(eltype(p_range[1]))],[zero(eltype(p_range[1]))],[zero(eltype(p_range[1])), zero(eltype(p_range[1]))]) for i in 1:Threads.nthreads()]
-  #
-  # acc_LBC_opt = zeros(eltype(p_range_LBC[1]), length(p_range_LBC))
-  # loss_LBC_opt = zeros(eltype(p_range_LBC[1]),length(p_range_LBC))
-  # Threads.@threads for indxp in 1:length(p_range_LBC)
-  #   get_e_opt_p_LBC!(samples, distribution, p_range,p_range_LBC[indxp], caches[Threads.threadid()])
-  #   acc_LBC_opt[indxp] = 1-caches[Threads.threadid()].cres[1]/length(p_range)
-  #   loss_LBC_opt[indxp] = caches[Threads.threadid()].cres[2]/length(p_range)
-  # end
 
   caches=[LBC_cache([zero(eltype(p_range[1]))], [zero(eltype(p_range[1]))], [zero(eltype(p_range[1]))], [zero(eltype(p_range[1]))], [zero(eltype(p_range[1]))], [zero(eltype(p_range[1])),  zero(eltype(p_range[1]))]) for i in 1:length(p_range_LBC)]
 
@@ -103,14 +77,8 @@ function get_indicators_LBC_analytical(samples, distribution, p_range, p_range_L
   return acc_LBC_opt, loss_LBC_opt
 end
 
+# compute optimal indicator and loss of LBC at fixed value of tuning parameter
 function get_indicators_LBC_analytical_fixed_p(samples, distribution, p_range, p_range_LBC, indxp)
-  # cP1 = [zero(eltype(p_range[1]))]
-  # cP2 = [zero(eltype(p_range[1]))]
-  # cprob = [zero(eltype(p_range[1]))]
-  # cpredx = [zero(eltype(p_range[1]))]
-  # clabel = [zero(eltype(p_range[1]))]
-  # cres = [zero(eltype(p_range[1])), zero(eltype(p_range[1]))]
-  # LBCc = LBC_cache(cP1,cP2,cprob,cpredx,clabel,cres)
 
   cache=LBC_cache([zero(eltype(p_range[1]))], [zero(eltype(p_range[1]))], [zero(eltype(p_range[1]))], [zero(eltype(p_range[1]))], [zero(eltype(p_range[1]))], [zero(eltype(p_range[1])), zero(eltype(p_range[1]))])
 
@@ -121,46 +89,10 @@ function get_indicators_LBC_analytical_fixed_p(samples, distribution, p_range, p
   return acc_LBC_opt, loss_LBC_opt
 end
 
-#old function for separate calculation of the loss
-function get_loss_opt_LBC(samples, distribution, p_range, p_range_LBC, loss_type)
-  loss_opt = zeros(eltype(p_range_LBC[1]), length(p_range_LBC))
-  for indx_ptar in 1:length(p_range_LBC)
-    loss_opt[indx_ptar] = get_loss_opt_p_LBC(samples, distribution, p_range, p_range_LBC[indx_ptar], loss_type)
-  end
-  return loss_opt
-end
 
-function get_loss_opt_p_LBC(samples, distribution, p_range, p_tar, loss_type)
-  loss = zero(eltype(p_tar))
-  for p in p_range
-    for x in samples
-      pred = get_pred_opt_x_LBC(x, distribution, p_range, p_tar)
+# computation using neural networks
 
-      if p <= p_tar
-        label = one(eltype(p_tar))
-      else
-        label = zero(eltype(p_tar))
-      end
 
-      if loss_type == "MSE"
-        loss_x = (pred-label)^2
-      elseif loss_type == "CE"
-        loss_x = Flux.crossentropy([pred,one(eltype(pred))-pred], [label, one(eltype(label))-label])
-
-      else
-        error("Your loss function is currently not supported.")
-      end
-
-      loss += distribution(x, p)*loss_x
-    end
-  end
-  return loss/length(p_range)
-end
-
-#numerical part
-
-# need to be able to save trained NNs and re-evaluate without retraining (also save parameters during training)
-# implement batchwise training
 function main_loss_LBC_weighted(NN, pnn, dataset, p_tar, p_range, inputs)
   indices = convert.(Int, dataset[1,:])
   input = inputs[:, indices]

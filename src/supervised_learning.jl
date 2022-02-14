@@ -1,3 +1,6 @@
+# computation using analytical expression
+
+# define cache
 struct SL_cache{cP1type,cP2type,cprobtype,cpredxtype,cweighttype,clabeltype,crestype}
   cP1::cP1type
   cP2::cP2type
@@ -8,7 +11,7 @@ struct SL_cache{cP1type,cP2type,cprobtype,cpredxtype,cweighttype,clabeltype,cres
   cres::crestype
 end
 
-# analytical part
+# get optimal predictions for specific sample
 function get_pred_opt_x_SL!(x, distribution, p_range_1, p_range_2, SLc)
   @unpack cP1, cP2, cprob, cpredx, cweight, clabel, cres = SLc
 
@@ -24,10 +27,14 @@ function get_pred_opt_x_SL!(x, distribution, p_range_1, p_range_2, SLc)
   end
 
   if cP1[1] + cP2[1] == zero(eltype(cP2[1]))
+
+    # can detect inputs not contained in training data
     return zero(eltype(cP2[1]))
   else
+
+    # adjust depending on the choice of data labelling
+    # alternative: cP2[1]/(cP1[1]+cP2[1])
     return cP1[1]/(cP1[1]+cP2[1])
-    # return cP2[1]/(cP1[1]+cP2[1])
   end
 end
 
@@ -45,6 +52,7 @@ function l_add!(p_min, p_max, p_tar, cweight, clabel)
   return nothing
 end
 
+# get mean optimal predictions for fixed value of tuning parameter
 function get_pred_opt_p_SL!(samples, distribution, p_range_1, p_range_2, p_tar, SLc)
   @unpack cP1, cP2, cprob, cpredx, cweight, clabel, cres = SLc
 
@@ -56,17 +64,16 @@ function get_pred_opt_p_SL!(samples, distribution, p_range_1, p_range_2, p_tar, 
     cprob[1] = distribution(x, p_tar)
     cpredx[1] = get_pred_opt_x_SL!(x, distribution, p_range_1, p_range_2, SLc)
     if cpredx[1] == zero(eltype(cres[1]))
-      # println(cprob[1])
     end
     cres[1] += cprob[1]*cpredx[1]
 
-    # loss += prob*(pred_x-label)^2
-    # loss += prob*Flux.crossentropy([pred_x,1-pred_x], [label,1-label])
+    # choice of loss function
     cres[2] += cweight[1]*cprob[1]*crossentropy(cpredx[1], clabel[1])
   end
   return nothing
 end
 
+# compute optimal predictions and indicators, as well as optimal loss of SL
 function get_indicators_SL_analytical(samples, distribution, p_range, dp, p_min, p_max)
   p_range_1 = Tuple(collect(p_range[1]:dp:p_min))
   if p_range[end] == Inf
@@ -77,14 +84,6 @@ function get_indicators_SL_analytical(samples, distribution, p_range, dp, p_min,
 
   pred_SL_opt = zeros(eltype(dp),length(p_range))
   loss = zero(eltype(dp))
-
-  # cP1 = [zero(eltype(dp))]
-  # cP2 = [zero(eltype(dp))]
-  # cprob = [zero(eltype(dp))]
-  # cpredx = [zero(eltype(dp))]
-  # cweight = [zero(eltype(dp))]
-  # clabel = [zero(eltype(dp))]
-  # cres = [zero(eltype(dp)), zero(eltype(dp)), zero(eltype(dp))]
 
   caches=[SL_cache([zero(eltype(dp))], [zero(eltype(dp))], [zero(eltype(dp))], [zero(eltype(dp))], [zero(eltype(dp))], [zero(eltype(dp))], [zero(eltype(dp)), zero(eltype(dp)), zero(eltype(dp))]) for i in 1:Threads.nthreads()]
 
@@ -100,70 +99,13 @@ function get_indicators_SL_analytical(samples, distribution, p_range, dp, p_min,
     cres3 += caches[i].cres[3]
   end
 
-
-  # caches=[SL_cache([zero(eltype(dp))],[zero(eltype(dp))],[zero(eltype(dp))],[zero(eltype(dp))],[zero(eltype(dp))],[zero(eltype(dp))],[zero(eltype(dp)), zero(eltype(dp)), zero(eltype(dp))]) for i in 1:length(p_range)]
-  #
-  # @sync for indxp in collect(1:length(p_range))
-  #   Threads.@spawn get_pred_opt_p_SL!(samples, distribution, p_range_1, p_range_2, p_range[indxp], caches[indxp])
-  # end
-  #
-  # cres2 = zero(eltype(dp))
-  # cres3 = zero(eltype(dp))
-  # for indxp in collect(1:length(p_range))
-  #   pred_SL_opt[indxp] = caches[indxp].cres[1]
-  #   cres2 += caches[indxp].cres[2]
-  #   cres3 += caches[indxp].cres[3]
-  # end
-
   return pred_SL_opt, (-1*(circshift(pred_SL_opt, -1).-circshift(pred_SL_opt, 1))./(2*dp))[2:end-1], cres2/cres3
 end
 
-#old function for separate calculation of the loss
-function get_loss_opt_SL(samples, distribution, p_range, p_min, p_max, loss_type)
-  p_min_indx = findall(x -> x==p_min, p_range)[1]
-  p_max_indx = findall(x -> x==p_max, p_range)[1]
-  p_min_range = collect(1:p_min_indx)
-  p_max_range = collect(p_max_indx:length(p_range))
-  ranges = [p_min_range, p_max_range]
 
-  loss = zero(eltype(p_max))
-  for range_indx in collect(1:2)
-    range = ranges[range_indx]
-    for i in range
-      p = p_range[i]
-      loss_p = zero(eltype(p_max))
+# computation using neural networks
 
-      for x in samples
-        pred = get_pred_opt_x_SL(x, distribution, p_range, p_min, p_max)
-        if range_indx == 1
-          label = one(eltype(pred))
-        else
-          label = zero(eltype(pred))
-        end
 
-        if loss_type == "MSE"
-          loss_x = (pred-label)^2
-        elseif loss_type == "CE"
-          loss_x = Flux.crossentropy([pred, 1-pred], [label, 1-label])
-
-        else
-          error("Your loss function is currently not supported.")
-        end
-
-        loss_p += distribution(x, p)*loss_x
-      end
-      loss += loss_p
-    end
-  end
-
-  return loss/(length(p_min_range)+length(p_max_range))
-end
-
-# numerical part
-
-# implement training points apart from direct boundaries
-# need to be able to save trained NNs and re-evaluate without retraining (also save parameters during training)
-# implement batchwise training
 function main_loss_SL_weighted(NN, pnn, data, p_range, p_min, p_max, inputs)
   indices = convert.(Int, data[1, :])
   input = inputs[:, indices]
@@ -180,7 +122,6 @@ function main_loss_SL_weighted(NN, pnn, data, p_range, p_min, p_max, inputs)
       error("wrong asignment of training data")
     end
   end
-  # return loss + 0.0001*sum(MLP.sqnorm, pnn)
   return loss
 end
 
@@ -200,7 +141,6 @@ function main_loss_SL_stochastic(NN, pnn, data, p_range, p_min, p_max, inputs)
       error("wrong asignment of training data")
     end
   end
-  # return loss + 0.0001*sum(MLP.sqnorm, pnn)
   return loss/length(data[3, :])
 end
 
@@ -214,7 +154,6 @@ function main_loss_SL_opt(NN, pnn, data, p_range, p_min, p_max, inputs)
   for i in 1:size(pred)[2]
     loss += MLP.crossentropy(pred[1, i], data[2, i])
   end
-  # return loss + 0.0001*sum(MLP.sqnorm, pnn)
   return loss/length(data[1, :])
 end
 
@@ -386,7 +325,6 @@ function get_indicators_SL_numerical(pnn, NN, data_train, data_test, epochs, p_r
     pred_logger = pred_logger[2:end]
     NN_logger = NN_logger[2:end]
 
-    # predictions, indicator = predict_SL(data_test,p_range,trained_pnn,dp,NN,batchsize,n_batches_test)
   else
     predictions, indicator, loss = predict_SL(data_train, data_test, p_range, p_min, p_max, dp, NN, pnn, batchsize, n_batches_train, n_batches_test, len_p_train, inputs, calc_loss=true)
 
