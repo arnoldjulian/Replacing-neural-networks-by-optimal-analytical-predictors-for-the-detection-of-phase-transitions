@@ -28,6 +28,7 @@ function get_pred_opt_x_LBC!(x, distribution, p_range, p_tar, LBCc)
   if cP1[1] + cP2[1] == zero(eltype(cP1[1]))
     return zero(eltype(cP1[1]))
   else
+
     # adjust depending on the choice of data labelling
     # alternative: cP2[1]/(cP1[1]+cP2[1])
     return cP1[1]/(cP1[1]+cP2[1])
@@ -40,6 +41,8 @@ function get_e_opt_p_LBC!(samples, distribution, p_range, p_tar, LBCc)
   cres[1] = zero(eltype(cres[1]))
   cres[2] = zero(eltype(cres[2]))
   for p in p_range
+
+    # set label depending on current bipartition point p_tar
     if p <= p_tar
       clabel[1] = one(eltype(clabel[1]))
     else
@@ -49,7 +52,11 @@ function get_e_opt_p_LBC!(samples, distribution, p_range, p_tar, LBCc)
     for x in samples
       cpredx[1] = get_pred_opt_x_LBC!(x, distribution, p_range, p_tar, LBCc)
       cprob[1] = distribution(x, p)
+
+      # contribution to optimal loss
       cres[2] += cprob[1]*crossentropy(cpredx[1], clabel[1])
+
+      # contribution to optimal classification error
       cres[1] += cprob[1]*min(cpredx[1], one(eltype(cpredx[1]))-cpredx[1])
 
     end
@@ -62,19 +69,21 @@ function get_indicators_LBC_analytical(samples, distribution, p_range, p_range_L
 
   caches=[LBC_cache([zero(eltype(p_range[1]))], [zero(eltype(p_range[1]))], [zero(eltype(p_range[1]))], [zero(eltype(p_range[1]))], [zero(eltype(p_range[1]))], [zero(eltype(p_range[1])),  zero(eltype(p_range[1]))]) for i in 1:length(p_range_LBC)]
 
+  # start parallel computation for sampled values of tuning parameter
   @sync for indxp in collect(1:length(p_range_LBC))
     Threads.@spawn get_e_opt_p_LBC!(samples, distribution, p_range, p_range_LBC[indxp], caches[indxp])
   end
 
-  acc_LBC_opt = zeros(eltype(p_range_LBC[1]), length(p_range_LBC))
+  # construct optimal indicator and loss
+  indicator_LBC_opt = zeros(eltype(p_range_LBC[1]), length(p_range_LBC))
   loss_LBC_opt = zeros(eltype(p_range_LBC[1]), length(p_range_LBC))
   for indxp in collect(1:length(p_range_LBC))
-    acc_LBC_opt[indxp] = 1-caches[indxp].cres[1]/length(p_range)
+    indicator_LBC_opt[indxp] = 1-caches[indxp].cres[1]/length(p_range)
     loss_LBC_opt[indxp] = caches[indxp].cres[2]/length(p_range)
   end
 
 
-  return acc_LBC_opt, loss_LBC_opt
+  return indicator_LBC_opt, loss_LBC_opt
 end
 
 # compute optimal indicator and loss of LBC at fixed value of tuning parameter
@@ -257,13 +266,10 @@ function get_indicators_LBC_numerical_fixed_p(pnn, NN, dataset, epochs, p_range,
 
   n_batches = ceil(eltype(batchsize), size(dataset)[2]/batchsize)
   p_tar = p_range_LBC[indx_ptar]
-  # verbose && println("p: $p_tar")
 
   if !trained
     if stochastic
       losses, NN_logger, pred_logger = train_LBC_stochastic(NN, pnn, dataset, epochs, p_range, deepcopy(opt), p_tar, batchsize_stochastic, n_batches_train_stochastic, n_batches, inputs, verbose=verbose, saveat=saveat)
-
-      # train_LBC_stochastic(NN,pnn,dataset,epochs,p_range,opt,p_tar,batchsize,n_batches_stochastic,n_batches,inputs;verbose=false,saveat=epochs)
 
     else
       losses, NN_logger, pred_logger = train_LBC_weighted(NN, pnn, dataset, epochs, p_range, deepcopy(opt), p_tar, batchsize, n_batches, inputs, verbose=verbose, saveat=saveat)

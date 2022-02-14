@@ -1,12 +1,15 @@
+# compute L2 norm
 function sqnorm(x)
   return sum(abs2, x)
 end
 
+# compute binary crossentropy loss
 function crossentropy(p, l)
+
+  # add epsilon perturbation for floating-point stability
   return -1*(l*log(p+eps(float(eltype(p))))+(1-l)*log(1-p+eps(float(eltype(p)))))
 end
 
-#needs to be typed properly (i.e. not any)
 function prepare_dataset_tilted(p, distribution, n_samples, samples)
   data = []
   for x in samples

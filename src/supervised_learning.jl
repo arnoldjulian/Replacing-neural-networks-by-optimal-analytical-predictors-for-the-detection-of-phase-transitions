@@ -38,6 +38,7 @@ function get_pred_opt_x_SL!(x, distribution, p_range_1, p_range_2, SLc)
   end
 end
 
+# adjust labels and weights based on value of the tuning parameter p_tar
 function l_add!(p_min, p_max, p_tar, cweight, clabel)
   if p_tar <= p_min
     cweight[1] = one(eltype(cweight[1]))
@@ -65,9 +66,11 @@ function get_pred_opt_p_SL!(samples, distribution, p_range_1, p_range_2, p_tar, 
     cpredx[1] = get_pred_opt_x_SL!(x, distribution, p_range_1, p_range_2, SLc)
     if cpredx[1] == zero(eltype(cres[1]))
     end
+
+    # weight contribution cpredx[1] of each sample by its probability cprob[1]
     cres[1] += cprob[1]*cpredx[1]
 
-    # choice of loss function
+    # add up loss
     cres[2] += cweight[1]*cprob[1]*crossentropy(cpredx[1], clabel[1])
   end
   return nothing
@@ -75,6 +78,8 @@ end
 
 # compute optimal predictions and indicators, as well as optimal loss of SL
 function get_indicators_SL_analytical(samples, distribution, p_range, dp, p_min, p_max)
+
+  # define range of tuning parameter containing training data
   p_range_1 = Tuple(collect(p_range[1]:dp:p_min))
   if p_range[end] == Inf
     p_range_2 = Tuple(p_range[end])
@@ -87,6 +92,7 @@ function get_indicators_SL_analytical(samples, distribution, p_range, dp, p_min,
 
   caches=[SL_cache([zero(eltype(dp))], [zero(eltype(dp))], [zero(eltype(dp))], [zero(eltype(dp))], [zero(eltype(dp))], [zero(eltype(dp))], [zero(eltype(dp)), zero(eltype(dp)), zero(eltype(dp))]) for i in 1:Threads.nthreads()]
 
+  # start parallel computation for sampled values of tuning parameter
   Threads.@threads for indxp in collect(1:length(p_range))
     get_pred_opt_p_SL!(samples, distribution, p_range_1, p_range_2, p_range[indxp], caches[Threads.threadid()])
     pred_SL_opt[indxp] = caches[Threads.threadid()].cres[1]
