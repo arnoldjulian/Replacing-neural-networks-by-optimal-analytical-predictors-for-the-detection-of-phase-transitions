@@ -3,7 +3,7 @@ cd(@__DIR__)
 using Pkg; Pkg.activate("../..")
 
 # load packages
-using my_ml_for_pt
+using ml_for_pt
 using DelimitedFiles
 using LaTeXStrings
 using Plots
@@ -73,7 +73,7 @@ dataset = MLP.get_dataset(p_range, distr, samples)
 dataset_train_SL = MLP.get_training_data_SL(dataset, p_range, p_max, p_min)
 
 # standardize inputs
-inputs_one_hot = transpose(readdlm(folder_data*"strings.txt", eltype(dp)))
+inputs_one_hot = transpose(readdlm(data_folder*"strings.txt", eltype(dp)))
 mean_train, std_train = MLP.get_dataset_stats(dataset, inputs_one_hot, length(p_range))
 inputs_one_hot_stand = (inputs_one_hot.-mean_train)./std_train
 mean_train_SL, std_train_SL = MLP.get_dataset_stats(dataset_train_SL, inputs_one_hot, length(p_range))
@@ -156,14 +156,14 @@ end
 # plot and save results of supervised learning in save_folder
 plt = plot(p_range, pred_NN_SL, dpi=300, c="black", label="NN", ylims=(0.0,1.0))
 plot!(p_range ,pred_opt_SL, dpi=300, c="blue", label="analytical", ylims=(0.0,1.0))
-vline!([p_crit], label=L"p_{c}", c="red")
+vline!([p_crit1, p_crit2], label=L"p_{c}", c="red")
 xlabel!(L"$p$")
 ylabel!(L"$\hat{y}_{\mathrm{SL}}$")
 savefig(save_folder*"pred_NN_SL.png")
 
 plt = plot(p_range[2:end-1], indicator_NN_SL, dpi=300, c="black", label="NN")
 plot!(p_range[2:end-1], indicator_opt_SL, dpi=300, c="blue", label="analytical")
-vline!([p_crit], label=L"p_{c}", c="red")
+vline!([p_crit1, p_crit2], label=L"p_{c}", c="red")
 xlabel!(L"$p$")
 ylabel!(L"$I_{\mathrm{SL}}$")
 savefig(save_folder*"indicator_NN_SL.png")
@@ -190,7 +190,7 @@ pnn_PBM, re_PBM = Flux.destructure(NN_PBM)
 
 # set hyperparameters
 lr_PBM = 0.001f0
-epochs_PBM = 1000
+epochs_PBM = 100
 saveat_PBM = 100
 opt_PBM = ADAM(lr_PBM)
 verbose = true
@@ -251,14 +251,14 @@ end
 # plot and save results of prediction-based method in save_folder
 plt = plot(p_range, pred_NN_PBM, dpi=300, c="black", label="NN", ylims=(p_range[1], p_range[end]))
 plot!(p_range, pred_opt_PBM, dpi=300, c="blue", label="analytical", ylims=(p_range[1], p_range[end]))
-vline!([p_crit], label=L"p_{c}", c="red")
+vline!([p_crit1, p_crit2], label=L"p_{c}", c="red")
 xlabel!(L"$p$")
 ylabel!(L"$\hat{y}_{\mathrm{PBM}}$")
 savefig(save_folder*"pred_NN_PBM.png")
 
 plt = plot(p_range[2:end-1], indicator_NN_PBM, dpi=300, c="black", label="NN")
 plot!(p_range[2:end-1], indicator_opt_PBM, dpi=300, c="blue", label="analytical")
-vline!([p_crit], label=L"p_{c}", c="red")
+vline!([p_crit1, p_crit2], label=L"p_{c}", c="red")
 xlabel!(L"$p$")
 ylabel!(L"$I^{\mathrm{NN}}_{\mathrm{PBM}}$")
 savefig(save_folder*"indicator_NN_PBM.png")
@@ -321,14 +321,14 @@ end
 # plot and save results of learning by confusion in save_folder
 plt = plot(p_range_LBC, indicator_NN_LBC, dpi=300, c="black", label="NN")
 plot!(p_range_LBC, indicator_opt_LBC, dpi=300, c="blue", label="analytical")
-vline!([p_crit], label=L"p_{c}", c="red")
+vline!([p_crit1, p_crit2], label=L"p_{c}", c="red")
 xlabel!(L"$p$")
 ylabel!(L"$I_{\mathrm{LBC}}$")
 savefig(save_folder*"indicator_NN_LBC.png")
 
 plt = plot(p_range_LBC, loss_NN_LBC, dpi=300, c="black", label="NN")
 plot!(p_range_LBC, loss_opt_LBC, dpi=300, c="blue", label="analytical")
-vline!([p_crit], label=L"p_{c}", c="red")
+vline!([p_crit1, p_crit2], label=L"p_{c}", c="red")
 xlabel!(L"$p$")
 ylabel!(L"$\mathcal{L}_{\mathrm{LBC}}$")
 savefig(save_folder*"loss_NN_LBC.png")

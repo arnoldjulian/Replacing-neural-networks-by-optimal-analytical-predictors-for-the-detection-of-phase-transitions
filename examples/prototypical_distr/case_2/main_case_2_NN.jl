@@ -3,7 +3,7 @@ cd(@__DIR__)
 using Pkg; Pkg.activate("../../..")
 
 # load packages
-using my_ml_for_pt
+using ml_for_pt
 using DelimitedFiles
 using LaTeXStrings
 using Plots
@@ -247,7 +247,7 @@ pnn_LBC, re_LBC = Flux.destructure(NN_LBC)
 
 # set hyperparameters
 lr_LBC = 0.001f0
-epochs_LBC = 100
+epochs_LBC = 1000
 saveat_LBC = epochs_LBC
 opt_LBC = ADAM(lr_LBC)
 verbose = true

@@ -1,7 +1,7 @@
 # computation using analytical expression
 
 # define cache
-struct SL_cache{cP1type,cP2type,cprobtype,cpredxtype,cweighttype,clabeltype,crestype}
+struct SL_cache{cP1type, cP2type, cprobtype, cpredxtype, cweighttype, clabeltype, crestype}
   cP1::cP1type
   cP2::cP2type
   cprob::cprobtype
@@ -212,7 +212,7 @@ function train_SL_stochastic(NN, pnn, data_train, data_test, epochs, p_range, dp
 
   losses = zeros(eltype(p_range[1]), epochs)
   for epoch in 1:epochs
-    
+
     # compute loss and gradient batchwise
     for batch in 1:n_batches_train_stochastic
       randint = sample(1:length(data_train[1, :]), Weights(data_train[2, :]), batchsize_stochastic)

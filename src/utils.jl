@@ -89,7 +89,7 @@ function prepare_dataset(p, distribution, samples)
   return data, counter
 end
 
-# construct the training data set for applying SL with NNs, where we modify the underlying probability distributions to combat deviations due to finite sample statistics
+# construct the training data set for applying SL with NNs, where we modify the underlying probability distributions to combat deviations due to finite sample statistics (applicable for data generated from Boltzmann distributions)
 function get_modified_dataset_train_SL(distr, samples, p_range, n_samples; gs_index=1)
   new_dataset_train_SL = zeros(eltype(p_range[1]), (3, gs_index+length(samples)))
 
@@ -101,6 +101,7 @@ function get_modified_dataset_train_SL(distr, samples, p_range, n_samples; gs_in
   for indx in collect(1:gs_index)
     sample = samples[indx]
     p = length(p_range)
+
     new_dataset_train_SL[:, indx+gs_index]=[sample, distr(sample,p_range[end]), p]
   end
 
@@ -123,10 +124,9 @@ function get_modified_dataset_train_SL(distr, samples, p_range, n_samples; gs_in
   return new_dataset_train_SL
 end
 
-# construct the training data set for applying SL with NNs, where we do not modify the underlying probability distributions
+# construct the training data set for applying SL with NNs, where we do not modify the underlying probability distributions (applicable for data generated from Boltzmann distributions)
 function get_unmodified_dataset_train_SL(distr, samples, p_range, n_samples)
   new_dataset_train_SL = zeros(eltype(p_range[1]), (3, 1+length(samples)))
-
   new_dataset_train_SL[:, 1] = [samples[1], distr(samples[1], p_range[1]), 1]
 
   for indx in collect(1:length(samples))
@@ -139,6 +139,18 @@ function get_unmodified_dataset_train_SL(distr, samples, p_range, n_samples)
   new_dataset_train_SL[2, 2:end] = new_dataset_train_SL[2, 2:end]
 
   return new_dataset_train_SL
+end
+
+# construct the training data set for applying SL with NNs (general probability distributions)
+function get_training_data_SL(dataset_SL, p_range, p_max, p_min)
+	train = [dataset_SL[:, 1]]
+	for i in 2:size(dataset_SL)[2]
+		ele = dataset_SL[:, i]
+		if p_range[Int(ele[3])] <= p_min || p_range[Int(ele[3])] >= p_max
+			push!(train, ele)
+		end
+	end
+	return hcat(train...)
 end
 
 # compute mean and standard deviation of input features given a data set (used for standardization)

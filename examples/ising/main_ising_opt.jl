@@ -3,7 +3,7 @@ cd(@__DIR__)
 using Pkg; Pkg.activate("../..")
 
 # load packages
-using my_ml_for_pt
+using ml_for_pt
 using DelimitedFiles
 using LaTeXStrings
 using Plots
@@ -11,7 +11,7 @@ using Random
 ENV["GKSwstype"]="nul"
 
 # set linear system size and corresponding data folder
-L = 60
+L = 10
 # L=60
 data_folder = "../../data/ising/L="*string(L)*"/"
 

@@ -3,7 +3,7 @@ cd(@__DIR__)
 using Pkg; Pkg.activate("../../..")
 
 # load packages
-using my_ml_for_pt
+using ml_for_pt
 using DelimitedFiles
 using LaTeXStrings
 using Plots

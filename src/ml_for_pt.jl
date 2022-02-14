@@ -1,9 +1,9 @@
 __precompile__()
-module my_ml_for_pt
+module ml_for_pt
 
 # export package name as MLP
 export MLP
-const MLP = my_ml_for_pt
+const MLP = ml_for_pt
 
 # load packages
 using Flux
