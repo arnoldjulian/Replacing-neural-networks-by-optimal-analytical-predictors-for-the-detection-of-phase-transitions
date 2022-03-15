@@ -35,7 +35,7 @@ The data used to construct the corresponding probability distributions can be fo
 @article{arnold:2022,
   title={Replacing neural networks by optimal analytical predictors for the detection of phase transitions},
   author={Arnold, Julian and Sch\"{a}fer, Frank},
-  journal={arXiv preprint arXiv:xxx},
+  journal={arXiv preprint arXiv:2203.06084},
   year={2022}
 }
 ```
