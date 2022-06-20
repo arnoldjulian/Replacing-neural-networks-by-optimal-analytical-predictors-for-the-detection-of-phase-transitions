@@ -11,8 +11,8 @@ using Random
 ENV["GKSwstype"]="nul"
 
 # set linear system size and corresponding data folder
-L = 6
-# L = 8
+# L = 6
+L = 8
 data_folder = "../../data/mbl_bose_hubbard/L="*string(L)*"/"
 
 # set path to save folder
@@ -27,6 +27,8 @@ p_min = 0.1
 p_max = 20.0
 n_points = 200
 p_range = collect(LinRange(p_min, p_max, n_points))
+p_min_indx = 1
+p_max_indx = length(p_range)
 dp = p_range[2]-p_range[1]
 p_range_LBC = collect(p_min-dp/2:dp:p_max+dp/2)
 
@@ -53,17 +55,27 @@ function distribution(sample, p, p_range, probss)
 end
 distr = (x, p) -> distribution(x, p, p_range ,probss)
 
+# construct data matrix that contains probabilties for all unique samples at each parameter value
+data = zeros(eltype(p_range[1]),(n_samples,length(p_range)))
+for sample_indx in 1:length(samples)
+  sample = samples[sample_indx]
+  for p_indx in 1:length(p_range)
+    p = p_range[p_indx]
+	data[sample_indx,p_indx] = distr(sample,p)
+  end
+end
+
 # supervised learning using analytical expression
 # returns optimal predictions, indicator, and loss
-pred_opt_SL, indicator_opt_SL, loss_opt_SL = MLP.get_indicators_SL_analytical(samples, distr, p_range, dp, p_min, p_max)
+pred_opt_SL, indicator_opt_SL, loss_opt_SL = MLP.get_indicators_SL_analytical(data, p_range, dp, p_min_indx, p_max_indx)
 
 # prediction-based method using analytical expression
 # returns optimal predictions, indicator, and loss
-pred_opt_PBM, indicator_opt_PBM, loss_opt_PBM = MLP.get_indicators_PBM_analytical(samples, distr, p_range, dp)
+pred_opt_PBM, indicator_opt_PBM, loss_opt_PBM = MLP.get_indicators_PBM_analytical(data, p_range, dp)
 
 # learning by confusion using analytical expression
 # returns optimal indicator and loss
-indicator_opt_LBC, loss_opt_LBC = MLP.get_indicators_LBC_analytical(samples, distr, p_range, p_range_LBC)
+indicator_opt_LBC, loss_opt_LBC = MLP.get_indicators_LBC_analytical(data, p_range)
 
 # save output in save_folder
 open(save_folder*"p_range_SL.txt", "w") do io

@@ -11,8 +11,8 @@ using Random
 ENV["GKSwstype"]="nul"
 
 # set linear system size and corresponding data folder
-L = 10
-# L=60
+# L = 10
+L = 60
 data_folder = "../../data/ising/L="*string(L)*"/"
 
 # set path to save folder
@@ -26,8 +26,9 @@ p_min = 0.05f0
 p_max = 10.0f0
 dp = 0.05f0
 p_range = collect(p_min:dp:p_max)
+p_min_indx = 1
+p_max_indx = length(p_range)
 p_range_LBC = collect(p_min-dp/2:dp:p_max+dp/2)
-
 # import Monte Carlo data
 
 # unique energies at p=p_1
@@ -51,19 +52,20 @@ n_samples = sum(numbers[1])
 # construct probability distribution from Monte Carlo data
 # distr(x,p) gives probability to draw the sample x at parameter value p
 # samples correspond to enumeration of unique energies with integers
-distr,samples = MLP.distr_approx(energies, unique_energies, numbers, p_range)
+# data matrix contains probabilties for all unique samples at each parameter value
+data, distr, samples = MLP.distr_approx(energies, unique_energies, numbers, p_range)
 
 # supervised learning using analytical expression
 # returns optimal predictions, indicator, and loss
-pred_opt_SL, indicator_opt_SL, loss_opt_SL = MLP.get_indicators_SL_analytical(samples, distr, p_range, dp, p_min, p_max)
+pred_opt_SL, indicator_opt_SL, loss_opt_SL = MLP.get_indicators_SL_analytical(data, p_range, dp, p_min_indx, p_max_indx)
 
 # prediction-based method using analytical expression
 # returns optimal predictions, indicator, and loss
-pred_opt_PBM, indicator_opt_PBM, loss_opt_PBM = MLP.get_indicators_PBM_analytical(samples, distr, p_range, dp)
+pred_opt_PBM, indicator_opt_PBM, loss_opt_PBM = MLP.get_indicators_PBM_analytical(data, p_range, dp)
 
 # learning by confusion using analytical expression
 # returns optimal indicator and loss
-indicator_opt_LBC, loss_opt_LBC = MLP.get_indicators_LBC_analytical(samples, distr, p_range, p_range_LBC)
+indicator_opt_LBC, loss_opt_LBC = MLP.get_indicators_LBC_analytical(data, p_range)
 
 # save output in save_folder
 open(save_folder*"p_range_SL.txt", "w") do io
