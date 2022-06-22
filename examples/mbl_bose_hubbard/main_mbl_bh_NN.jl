@@ -62,7 +62,7 @@ for sample_indx in 1:length(samples)
   sample = samples[sample_indx]
   for p_indx in 1:length(p_range)
     p = p_range[p_indx]
-	data[sample_indx,p_indx] = distr(sample,p)
+    data[sample_indx,p_indx] = distr(sample,p)
   end
 end
 

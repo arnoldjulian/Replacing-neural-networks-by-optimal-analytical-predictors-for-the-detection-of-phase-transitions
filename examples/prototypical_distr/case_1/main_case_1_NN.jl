@@ -29,11 +29,11 @@ distr,samples = MLP.constant_distr()
 # construct data matrix that contains probabilties for all unique samples at each parameter value
 data = zeros(eltype(p_range[1]),(length(samples),length(p_range)))
 for sample_indx in 1:length(samples)
-	sample = samples[sample_indx]
-	for p_indx in 1:length(p_range)
-		p = p_range[p_indx]
-		data[sample_indx,p_indx] = distr(sample,p)
-	end
+  sample = samples[sample_indx]
+  for p_indx in 1:length(p_range)
+    p = p_range[p_indx]
+    data[sample_indx,p_indx] = distr(sample,p)
+  end
 end
 
 # get dataset for training NNs using SL, where p_max_indx and p_min_indx mark boundaries of training regions
