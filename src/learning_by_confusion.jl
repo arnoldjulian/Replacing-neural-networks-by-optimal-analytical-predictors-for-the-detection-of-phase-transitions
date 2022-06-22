@@ -7,7 +7,6 @@ function get_indicators_LBC_analytical_fixed_p(data, p_range, p_tar_indx)
   pred_opt = p1./(p1.+p2)
 
   error = sum(data.*(min.(pred_opt,ones(eltype(p_range[1]),length(pred_opt)).-pred_opt)))
-
   loss = sum((crossentropy.(pred_opt, 1)')*(@view data[:, 1:p_tar_indx-1])) + sum((crossentropy.(pred_opt, 0)')*(@view data[:, p_tar_indx:length(p_range)]))
 
   return 1-error/length(p_range), loss/length(p_range)
@@ -32,6 +31,7 @@ end
 # loss function where each prediction is weighted by probability associated with input
 function main_loss_LBC(NN, pnn, data, p_tar_indx, p_range, inputs)
   pred = @view Flux.softmax(NN(pnn)(inputs))[1,:]
+
   return (sum((crossentropy.(pred, 1)')*(@view data[:, 1:p_tar_indx-1])) + sum((crossentropy.(pred, 0)')*(@view data[:, p_tar_indx:length(p_range)])))/length(p_range)
 end
 

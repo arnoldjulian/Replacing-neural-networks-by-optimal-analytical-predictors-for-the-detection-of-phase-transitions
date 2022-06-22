@@ -7,9 +7,7 @@ function get_indicators_SL_analytical(data, p_range, dp, p_min_indx, p_max_indx)
 
   pred = [if p1[i]+p2[i] != zero(eltype(p_range[1])) p1[i]/(p1[i]+p2[i]) else zero(eltype(p_range[1])) end for i in 1:size(data)[1]]
 
-
   loss = sum((crossentropy.(pred,1)')*(@view data[:,1:p_min_indx])) + sum((crossentropy.(pred,0)')*(@view data[:,p_max_indx:length(p_range)]))
-
 
   pred_SL_opt = sum(data.*pred,dims=1)[1,:]
 
@@ -28,7 +26,6 @@ function get_indicators_SL_analytical_threaded(data, p_range, dp, p_min_indx, p_
   p2 = @view sum(data[:,p_max_indx:end],dims=2)[:,1]
 
   pred = [if p1[i]+p2[i] != zero(eltype(p_range[1])) p1[i]/(p1[i]+p2[i]) else zero(eltype(p_range[1])) end for i in 1:size(data)[1]]
-
 
   # start parallel computation for sampled values of tuning parameter
   loss = zero(eltype(p_range[1]))
