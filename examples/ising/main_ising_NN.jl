@@ -13,7 +13,7 @@ ENV["GKSwstype"]="nul"
 
 # set linear system size and corresponding data folder
 L = 10
-# L=60
+# L = 60
 data_folder = "../../data/ising/L="*string(L)*"/"
 
 # set path to save folder
@@ -27,11 +27,13 @@ p_min = 0.05f0
 p_max = 10.0f0
 dp = 0.05f0
 p_range = collect(p_min:dp:p_max)
+p_min_indx = 1
+p_max_indx = length(p_range)
 p_range_LBC = collect(p_min-dp/2:dp:p_max+dp/2)
 
 # import Monte Carlo data
 
-# unique energies at p=p_1
+# unique energies at T=T_1
 energy = readdlm(data_folder*"E_T="*string(0)*".txt", eltype(dp))
 
 # number of times each energy is drawn at T=T_1
@@ -52,33 +54,31 @@ n_samples = sum(numbers[1])
 # construct probability distribution from Monte Carlo data
 # distr(x,p) gives probability to draw the sample x at parameter value p
 # samples correspond to enumeration of unique energies with integers
-distr,samples = MLP.distr_approx(energies, unique_energies, numbers, p_range)
+data, distr, samples = MLP.distr_approx(energies, unique_energies, numbers, p_range)
+
+# get dataset for training NNs using SL, where p_max_indx and p_min_indx mark boundaries of training regions
+data_train_SL = MLP.get_training_data_SL_modified(data, p_max_indx, p_min_indx, n_samples)
 
 # optionally run methods using the analytical expressions to compare with neural network results
 
 # supervised learning using analytical expression
 # returns optimal predictions, indicator, and loss
-pred_opt_SL, indicator_opt_SL, loss_opt_SL = MLP.get_indicators_SL_analytical(samples, distr, p_range, dp, p_min, p_max)
+pred_opt_SL, indicator_opt_SL, loss_opt_SL = MLP.get_indicators_SL_analytical(data, p_range, dp, p_min_indx, p_max_indx)
 
 # prediction-based method using analytical expression
 # returns optimal predictions, indicator, and loss
-pred_opt_PBM, indicator_opt_PBM, loss_opt_PBM = MLP.get_indicators_PBM_analytical(samples, distr, p_range, dp)
+pred_opt_PBM, indicator_opt_PBM, loss_opt_PBM = MLP.get_indicators_PBM_analytical(data, p_range, dp)
 
 # learning by confusion using analytical expression
 # returns optimal indicator and loss
-indicator_opt_LBC, loss_opt_LBC = MLP.get_indicators_LBC_analytical(samples, distr, p_range, p_range_LBC)
-
-# construct dataset for training neural networks
-dataset = MLP.get_dataset(p_range, distr, samples)
-dataset_train_SL = MLP.get_modified_dataset_train_SL(distr, samples, p_range, n_samples)
+indicator_opt_LBC, loss_opt_LBC = MLP.get_indicators_LBC_analytical(data, p_range)
 
 # standardize inputs
 inputs_one_hot = reshape(unique_energies, 1, length(unique_energies))
-mean_train,std_train = MLP.get_dataset_stats(dataset, inputs_one_hot, length(p_range))
+mean_train,std_train = MLP.get_dataset_stats(data, inputs_one_hot)
 inputs_one_hot_stand = (inputs_one_hot.-mean_train)./std_train
-mean_train_SL,std_train_SL = MLP.get_dataset_stats(dataset_train_SL, inputs_one_hot, length(p_range))
+mean_train_SL,std_train_SL = MLP.get_dataset_stats(data_train_SL, inputs_one_hot)
 inputs_one_hot_stand_SL = (inputs_one_hot.-mean_train_SL)./std_train_SL
-
 
 # supervised learning using neural networks
 
@@ -96,11 +96,11 @@ lr_SL = 0.001f0
 epochs_SL = 10000
 saveat_SL = 100
 opt_SL = ADAM(lr_SL)
-verbose = true
+verbose = false
 
 # train neural network
 # returns predictions, indicators, and loss saved at epochs specified by saveat_SL variable
-pred_logger_SL, losses_SL, NN_logger_SL = MLP.get_indicators_SL_numerical(pnn_SL,  re_SL, dataset_train_SL, dataset, epochs_SL, p_range, dp, p_min, p_max, opt_SL, inputs_one_hot_stand, verbose=verbose, saveat=saveat_SL)
+pred_logger_SL, losses_SL, NN_logger_SL = MLP.get_indicators_SL_numerical(pnn_SL, re_SL, data_train_SL, data, epochs_SL, p_range, dp, p_min_indx, p_max_indx, opt_SL, inputs_one_hot_stand_SL, verbose=verbose, saveat=saveat_SL)
 
 # extract results at last save point
 pred_NN_SL = pred_logger_SL[end][1]
@@ -189,11 +189,11 @@ lr_PBM = 0.001f0
 epochs_PBM = 1000
 saveat_PBM = 100
 opt_PBM = ADAM(lr_PBM)
-verbose = true
+verbose = false
 
 # train neural network
 # returns predictions, indicators, and loss saved at epochs specified by saveat_PBM variable
-pred_logger_PBM, losses_PBM, NN_logger_PBM =MLP.get_indicators_PBM_numerical(pnn_PBM, re_PBM, dataset, epochs_PBM, p_range, dp, opt_PBM, inputs_one_hot_stand, verbose=verbose, saveat=saveat_PBM)
+pred_logger_PBM, losses_PBM, NN_logger_PBM =MLP.get_indicators_PBM_numerical(pnn_PBM, re_PBM, data, epochs_PBM, p_range, dp, opt_PBM, inputs_one_hot_stand, verbose=verbose, saveat=saveat_PBM)
 
 # extract results at last save point
 pred_NN_PBM = pred_logger_PBM[end][1]
@@ -279,15 +279,16 @@ pnn_LBC, re_LBC = Flux.destructure(NN_LBC)
 
 # set hyperparameters
 lr_LBC = 0.001f0
-epochs_LBC = 100
+epochs_LBC = 1000
 saveat_LBC = epochs_LBC
 opt_LBC = ADAM(lr_LBC)
-verbose = true
+verbose = false
 
+# train neural networks
 indicator_NN_LBC = []
 loss_NN_LBC = []
 for indx in collect(1:length(p_range_LBC))
-  pred_logger_LBC, losses_LBC, NN_logger_LBC = MLP.get_indicators_LBC_numerical_fixed_p(deepcopy(pnn_LBC), re_LBC, dataset, epochs_LBC, p_range, dp, opt_LBC, p_range_LBC, indx, inputs_one_hot_stand, saveat=saveat_LBC, verbose=verbose)
+  pred_logger_LBC, losses_LBC, NN_logger_LBC = MLP.get_indicators_LBC_numerical_fixed_p(deepcopy(pnn_LBC), re_LBC, data, epochs_LBC, p_range, dp, deepcopy(opt_LBC), p_range_LBC, indx, inputs_one_hot_stand, saveat=saveat_LBC, verbose=verbose)
 
   indicator_NN_LBC_p = pred_logger_LBC[end][1][1]
   push!(indicator_NN_LBC, indicator_NN_LBC_p)
