@@ -53,7 +53,6 @@ function train_PBM(NN, pnn, data, epochs, p_range, dp, opt, inputs; verbose=fals
 
     # compute loss and gradient
     val, back = Flux.Zygote.pullback(p -> main_loss_PBM(NN, p, data, p_range, inputs), pnn)
-
     val_reg, back_reg = Flux.Zygote.pullback(p -> L2_penalty(lambda, p), pnn)
     grad = back(one(val))[1].+back_reg(one(val_reg))[1]
     losses[epoch] = val+val_reg

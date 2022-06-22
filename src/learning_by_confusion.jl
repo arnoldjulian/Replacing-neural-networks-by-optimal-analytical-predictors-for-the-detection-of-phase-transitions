@@ -48,7 +48,6 @@ function train_LBC(NN, pnn, data, epochs, p_range, opt, p_tar_indx, inputs; verb
 
     # compute loss and gradient
     val, back = Flux.Zygote.pullback(p -> main_loss_LBC(NN, p, data, p_tar_indx, p_range, inputs), pnn)
-
     val_reg, back_reg = Flux.Zygote.pullback(p -> L2_penalty(lambda, p), pnn)
     grad = back(one(val))[1].+back_reg(one(val_reg))[1]
     losses[epoch] = val+val_reg

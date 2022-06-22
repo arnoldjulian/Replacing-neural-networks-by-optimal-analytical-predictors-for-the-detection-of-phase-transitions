@@ -76,7 +76,6 @@ function train_SL(NN, pnn, data_train, data_test, epochs, p_range, dp, p_min_ind
 
     # compute loss and gradient
     val, back = Flux.Zygote.pullback(p -> main_loss_SL(NN, p, data_train, p_range, p_min_indx, p_max_indx, inputs, len_p_train), pnn)
-
     val_reg, back_reg = Flux.Zygote.pullback(p -> L2_penalty(lambda, p), pnn)
     grad = back(one(val))[1].+back_reg(one(val_reg))[1]
     losses[epoch] = val+val_reg
