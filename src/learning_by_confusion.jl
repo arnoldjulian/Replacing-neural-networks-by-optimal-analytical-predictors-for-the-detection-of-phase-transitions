@@ -48,7 +48,8 @@ function train_LBC(NN, pnn, data, epochs, p_range, opt, p_tar_indx, inputs; verb
 
     # compute loss and gradient
     val, back = Flux.Zygote.pullback(p -> main_loss_LBC(NN, p, data, p_tar_indx, p_range, inputs), pnn)
-	val_reg, back_reg = Flux.Zygote.pullback(p -> L2_penalty(lambda, p), pnn)
+
+    val_reg, back_reg = Flux.Zygote.pullback(p -> L2_penalty(lambda, p), pnn)
     grad = back(one(val))[1].+back_reg(one(val_reg))[1]
     losses[epoch] = val+val_reg
 
@@ -56,7 +57,7 @@ function train_LBC(NN, pnn, data, epochs, p_range, opt, p_tar_indx, inputs; verb
     Flux.Optimise.update!(opt, pnn, grad)
 
     # keep track of best performing NN
-	if savebest
+    if savebest
       if epoch == 1
         best_loss = losses[epoch]
       elseif losses[epoch] < best_loss
@@ -68,8 +69,8 @@ function train_LBC(NN, pnn, data, epochs, p_range, opt, p_tar_indx, inputs; verb
       end
     else
       best_loss = losses[epoch]
-	  pnn_best = deepcopy(pnn)
-	end
+      pnn_best = deepcopy(pnn)
+    end
 
     # save at regular intervals
     if epoch % saveat == 0

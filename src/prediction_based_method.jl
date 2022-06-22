@@ -12,8 +12,9 @@ function get_indicators_PBM_analytical(full_data, p_range, dp)
   mean_pred_opt = zeros(eltype(p_range[1]),length(p_range))
   loss_opt = zeros(eltype(p_range[1]),length(p_range))
   Threads.@threads for i in 1:length(p_range)
+
     mean_pred_opt[i] = sum((@view full_data[:,i]).*pred_opt)
-	loss_opt[i] = sum((@view full_data[:,i]).*((pred_opt.-p_range[i]).^2))
+    loss_opt[i] = sum((@view full_data[:,i]).*((pred_opt.-p_range[i]).^2))
   end
 
   # compute indicator using symmetric difference quotient
@@ -52,7 +53,8 @@ function train_PBM(NN, pnn, data, epochs, p_range, dp, opt, inputs; verbose=fals
 
     # compute loss and gradient
     val, back = Flux.Zygote.pullback(p -> main_loss_PBM(NN, p, data, p_range, inputs), pnn)
-	val_reg, back_reg = Flux.Zygote.pullback(p -> L2_penalty(lambda, p), pnn)
+
+    val_reg, back_reg = Flux.Zygote.pullback(p -> L2_penalty(lambda, p), pnn)
     grad = back(one(val))[1].+back_reg(one(val_reg))[1]
     losses[epoch] = val+val_reg
 
@@ -60,7 +62,7 @@ function train_PBM(NN, pnn, data, epochs, p_range, dp, opt, inputs; verbose=fals
     Flux.Optimise.update!(opt, pnn, grad)
 
     # keep track of best performing NN
-	if savebest
+    if savebest
       if epoch == 1
         best_loss = losses[epoch]
       elseif losses[epoch] < best_loss
@@ -72,8 +74,8 @@ function train_PBM(NN, pnn, data, epochs, p_range, dp, opt, inputs; verbose=fals
       end
     else
       best_loss = losses[epoch]
-	  pnn_best = deepcopy(pnn)
-	end
+      pnn_best = deepcopy(pnn)
+    end
 
     # save at regular intervals
     if epoch % saveat == 0

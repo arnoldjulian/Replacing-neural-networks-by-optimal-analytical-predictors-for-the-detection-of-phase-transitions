@@ -76,7 +76,8 @@ function train_SL(NN, pnn, data_train, data_test, epochs, p_range, dp, p_min_ind
 
     # compute loss and gradient
     val, back = Flux.Zygote.pullback(p -> main_loss_SL(NN, p, data_train, p_range, p_min_indx, p_max_indx, inputs, len_p_train), pnn)
-	val_reg, back_reg = Flux.Zygote.pullback(p -> L2_penalty(lambda, p), pnn)
+
+    val_reg, back_reg = Flux.Zygote.pullback(p -> L2_penalty(lambda, p), pnn)
     grad = back(one(val))[1].+back_reg(one(val_reg))[1]
     losses[epoch] = val+val_reg
 
@@ -84,7 +85,7 @@ function train_SL(NN, pnn, data_train, data_test, epochs, p_range, dp, p_min_ind
     Flux.Optimise.update!(opt, pnn, grad)
 
     # keep track of best performing NN
-	if savebest
+    if savebest
       if epoch == 1
         best_loss = losses[epoch]
       elseif losses[epoch] < best_loss
@@ -96,8 +97,8 @@ function train_SL(NN, pnn, data_train, data_test, epochs, p_range, dp, p_min_ind
       end
     else
       best_loss = losses[epoch]
-	  pnn_best = deepcopy(pnn)
-	end
+      pnn_best = deepcopy(pnn)
+    end
 
     # save at regular intervals
     if epoch % saveat == 0
@@ -122,7 +123,7 @@ function predict_SL(data_train, data_test, p_range, p_min_indx, p_max_indx, dp, 
   # compute indicator using symmetric difference quotient
   ind_SL = zeros(eltype(p_range[1]),length(p_range)-2)
   for i in 2:length(p_range)-1
-	  ind_SL[i-1] = -1*(pred_SL[i+1]-pred_SL[i-1])/(2*dp)
+      ind_SL[i-1] = -1*(pred_SL[i+1]-pred_SL[i-1])/(2*dp)
   end
 
   # compute loss
