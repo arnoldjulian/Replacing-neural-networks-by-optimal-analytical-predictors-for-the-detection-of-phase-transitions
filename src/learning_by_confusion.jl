@@ -4,7 +4,7 @@
 function get_indicators_LBC_analytical_fixed_p(data, p_range, p_tar_indx)
   p1 = sum((@view data[:,1:p_tar_indx-1]),dims=2)[:,1]
   p2 = sum((@view data[:,p_tar_indx:end]),dims=2)[:,1]
-  pred_opt = p1./(p1.+p2)
+  pred_opt = p1./(p1.+p2.+eps(eltype(p_range[1])))
 
   error = sum(data.*(min.(pred_opt,ones(eltype(p_range[1]),length(pred_opt)).-pred_opt)))
   loss = sum((crossentropy.(pred_opt, 1)')*(@view data[:, 1:p_tar_indx-1])) + sum((crossentropy.(pred_opt, 0)')*(@view data[:, p_tar_indx:length(p_range)]))

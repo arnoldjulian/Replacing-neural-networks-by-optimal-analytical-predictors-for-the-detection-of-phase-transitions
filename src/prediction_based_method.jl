@@ -6,7 +6,7 @@ function get_indicators_PBM_analytical(full_data, p_range, dp)
   # start parallel computation for sampled values of tuning parameter
   pred_opt = zeros(eltype(p_range[1]),size(full_data)[1])
   Threads.@threads for i in 1:size(full_data)[1]
-    pred_opt[i] = sum((@view full_data[i,:]).*p_range)/sum((@view full_data[i,:]))
+    pred_opt[i] = sum((@view full_data[i,:]).*p_range)/(sum((@view full_data[i,:]))+eps(eltype(dp)))
   end
 
   mean_pred_opt = zeros(eltype(p_range[1]),length(p_range))
@@ -22,7 +22,7 @@ end
 
 # compute optimal predictions and indicators, as well as optimal loss of PBM without multiple threads (non-default option; useful if only a single CPU is available)
 function get_indicators_PBM_analytical_not_threaded(full_data, p_range, dp)
-  pred_opt = sum(full_data.*p_range',dims=2)./sum(full_data,dims=2)
+  pred_opt = sum(full_data.*p_range',dims=2)./(sum(full_data,dims=2).+eps(eltype(dp)))
   mean_pred_opt = sum(full_data.*pred_opt,dims=1)[1,:]
   loss_opt = mean(p_range.^2) + mean(sum(full_data.*(pred_opt.^2),dims=1)) - 2*mean(mean_pred_opt.*p_range)
 
