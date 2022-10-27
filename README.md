@@ -3,7 +3,7 @@ This repository contains a Julia implementation for the approach introduced in o
 [paper](https://arxiv.org/abs/2203.06084).
 
 ### Abstract of the paper
-Identifying phase transitions and classifying phases of matter is central to understanding the properties and behavior of a broad range of material systems. In recent years, machine-learning (ML) techniques have been successfully applied to perform such tasks in a data-driven manner. However, the success of this approach notwithstanding, we still lack a clear understanding of ML methods for detecting phase transitions, particularly of those that utilize neural networks (NNs). In this work, we derive analytical expressions for the optimal output of three widely used NN-based methods for detecting phase transitions. These optimal predictions correspond to the results obtained in the limit of high model capacity. Therefore, in practice they can, for example, be recovered using sufficiently large, well-trained NNs. The inner workings of the considered methods are revealed through the explicit dependence of the optimal output on the input data. By evaluating the analytical expressions, we can identify phase transitions directly from experimentally accessible data without training NNs, which makes this procedure favorable in terms of computation time. Our theoretical results are supported by extensive numerical simulations covering, e.g., topological, quantum, and many-body localization phase transitions. We expect similar analyses to provide a deeper understanding of other classification tasks in condensed matter physics.
+Identifying phase transitions and classifying phases of matter is central to understanding the properties and behavior of a broad range of material systems. In recent years, machine-learning (ML) techniques have been successfully applied to perform such tasks in a data-driven manner. However, the success of this approach notwithstanding, we still lack a clear understanding of ML methods for detecting phase transitions, particularly of those that utilize neural networks (NNs). In this work, we derive analytical expressions for the optimal output of three widely used NN-based methods for detecting phase transitions. These optimal predictions correspond to the results obtained in the limit of high model capacity. Therefore, in practice, they can, for example, be recovered using sufficiently large, well-trained NNs. The inner workings of the considered methods are revealed through the explicit dependence of the optimal output on the input data. By evaluating the analytical expressions, we can identify phase transitions directly from experimentally accessible data without training NNs, which makes this procedure favorable in terms of computation time. Our theoretical results are supported by extensive numerical simulations covering, e.g., topological, quantum, and many-body localization phase transitions. We expect similar analyses to provide a deeper understanding of other classification tasks in condensed matter physics.
 
 ![](./assets/method.png)
 
@@ -32,10 +32,18 @@ The data used to construct the corresponding probability distributions can be fo
 - [Frank Schäfer](https://github.com/frankschae)
 
 ```
-@article{arnold:2022,
-  title={Replacing neural networks by optimal analytical predictors for the detection of phase transitions},
-  author={Arnold, Julian and Sch\"{a}fer, Frank},
-  journal={arXiv preprint arXiv:2203.06084},
-  year={2022}
+@article{PhysRevX.12.031044,
+  title = {Replacing Neural Networks by Optimal Analytical Predictors for the Detection of Phase Transitions},
+  author = {Arnold, Julian and Sch\"afer, Frank},
+  journal = {Phys. Rev. X},
+  volume = {12},
+  issue = {3},
+  pages = {031044},
+  numpages = {39},
+  year = {2022},
+  month = {Sep},
+  publisher = {American Physical Society},
+  doi = {10.1103/PhysRevX.12.031044},
+  url = {https://link.aps.org/doi/10.1103/PhysRevX.12.031044}
 }
 ```
